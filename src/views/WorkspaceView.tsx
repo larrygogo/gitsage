@@ -1,4 +1,6 @@
 import { type Component, createSignal, createEffect, Show, For } from "solid-js";
+import ChevronDown from "lucide-solid/icons/chevron-down";
+import ChevronRight from "lucide-solid/icons/chevron-right";
 import { Button } from "@/components/ui";
 import SplitPane from "@/components/ui/SplitPane";
 import type { FileStatus, FileStatusKind, DiffOutput, StashEntry, RepoOperationState } from "@/types";
@@ -333,7 +335,7 @@ const WorkspaceView: Component<WorkspaceViewProps> = (props) => {
                   style={{ display: "flex", "align-items": "center", gap: "8px", background: "none", border: "none", cursor: "pointer", color: "inherit" }}
                   onClick={() => setStashesOpen(!stashesOpen())}
                 >
-                  <span style={{ "font-size": "10px" }}>{stashesOpen() ? "\u25BC" : "\u25B6"}</span>
+                  {stashesOpen() ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
                   <span class={styles.groupTitle}>
                     Stash
                     <span class={styles.groupCount}>{stashes().length}</span>

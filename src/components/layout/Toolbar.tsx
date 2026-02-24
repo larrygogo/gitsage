@@ -1,4 +1,9 @@
 import { type Component, Show } from "solid-js";
+import GitBranch from "lucide-solid/icons/git-branch";
+import RefreshCw from "lucide-solid/icons/refresh-cw";
+import ArrowDown from "lucide-solid/icons/arrow-down";
+import ArrowUp from "lucide-solid/icons/arrow-up";
+import ArrowUpDown from "lucide-solid/icons/arrow-up-down";
 import styles from "./Toolbar.module.css";
 
 export interface ToolbarProps {
@@ -26,7 +31,7 @@ const Toolbar: Component<ToolbarProps> = (props) => {
         <Show when={branchName()}>
           <span class={styles.separator}>/</span>
           <span class={styles.branchBadge}>
-            <span class={styles.branchIcon}>{"\u2442"}</span>
+            <span class={styles.branchIcon}><GitBranch size={12} /></span>
             {branchName()}
           </span>
         </Show>
@@ -43,7 +48,7 @@ const Toolbar: Component<ToolbarProps> = (props) => {
             disabled={isSyncing()}
             title="Fetch - 获取远程更新"
           >
-            <span class={styles.syncIcon}>{"\u21BB"}</span>
+            <span class={styles.syncIcon}><RefreshCw size={14} /></span>
             <span class={styles.syncLabel}>Fetch</span>
           </button>
 
@@ -53,7 +58,7 @@ const Toolbar: Component<ToolbarProps> = (props) => {
             disabled={isSyncing()}
             title="Pull - 拉取远程变更"
           >
-            <span class={styles.syncIcon}>{"\u2193"}</span>
+            <span class={styles.syncIcon}><ArrowDown size={14} /></span>
             <span class={styles.syncLabel}>Pull</span>
           </button>
 
@@ -63,7 +68,7 @@ const Toolbar: Component<ToolbarProps> = (props) => {
             disabled={isSyncing()}
             title="Push - 推送本地变更"
           >
-            <span class={styles.syncIcon}>{"\u2191"}</span>
+            <span class={styles.syncIcon}><ArrowUp size={14} /></span>
             <span class={styles.syncLabel}>Push</span>
           </button>
 
@@ -73,7 +78,7 @@ const Toolbar: Component<ToolbarProps> = (props) => {
             disabled={isSyncing()}
             title="Pull (Rebase) - 变基拉取"
           >
-            <span class={styles.syncIcon}>{"\u21BB"}</span>
+            <span class={styles.syncIcon}><RefreshCw size={14} /></span>
             <span class={styles.syncLabel}>Pull Rebase</span>
           </button>
 
@@ -83,7 +88,7 @@ const Toolbar: Component<ToolbarProps> = (props) => {
             disabled={isSyncing()}
             title="Sync - 同步 (Pull + Push)"
           >
-            <span class={styles.syncIcon}>{"\u21C5"}</span>
+            <span class={styles.syncIcon}><ArrowUpDown size={14} /></span>
             <span class={styles.syncLabel}>Sync</span>
           </button>
         </div>

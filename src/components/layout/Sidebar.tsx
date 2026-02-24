@@ -1,4 +1,11 @@
 import { type Component, type JSX, Show, For, createSignal } from "solid-js";
+import LayoutGrid from 'lucide-solid/icons/layout-grid';
+import History from 'lucide-solid/icons/history';
+import GitBranch from 'lucide-solid/icons/git-branch';
+import PanelLeftOpen from 'lucide-solid/icons/panel-left-open';
+import PanelLeftClose from 'lucide-solid/icons/panel-left-close';
+import Folder from 'lucide-solid/icons/folder';
+import Settings from 'lucide-solid/icons/settings';
 import styles from "./Sidebar.module.css";
 
 export interface SidebarRepo {
@@ -18,10 +25,10 @@ export interface SidebarProps {
 }
 
 const quickActions = [
-  { id: "workspace", icon: "\u25A3", label: "\u5DE5\u4F5C\u533A" },
-  { id: "history", icon: "\u29D6", label: "\u5386\u53F2\u8BB0\u5F55" },
-  { id: "branches", icon: "\u2442", label: "\u5206\u652F" },
-] as const;
+  { id: "workspace" as const, icon: LayoutGrid, label: "工作区" },
+  { id: "history" as const, icon: History, label: "历史记录" },
+  { id: "branches" as const, icon: GitBranch, label: "分支" },
+];
 
 const Sidebar: Component<SidebarProps> = (props) => {
   const isCollapsed = () => props.collapsed;
@@ -38,7 +45,7 @@ const Sidebar: Component<SidebarProps> = (props) => {
         onClick={props.onToggle}
         title={isCollapsed() ? "\u5C55\u5F00\u4FA7\u8FB9\u680F" : "\u6536\u8D77\u4FA7\u8FB9\u680F"}
       >
-        {isCollapsed() ? "\u25B6" : "\u25C0"}
+        {isCollapsed() ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
       </button>
 
       {/* Quick actions */}
@@ -50,7 +57,7 @@ const Sidebar: Component<SidebarProps> = (props) => {
               onClick={() => props.onViewChange?.(action.id)}
               title={action.label}
             >
-              <span class={styles.actionIcon}>{action.icon}</span>
+              <span class={styles.actionIcon}><action.icon size={16} /></span>
               <Show when={!isCollapsed()}>
                 <span class={styles.actionLabel}>{action.label}</span>
               </Show>
@@ -72,7 +79,7 @@ const Sidebar: Component<SidebarProps> = (props) => {
                 onClick={() => props.onRepoSelect?.(repo.id)}
                 title={repo.name}
               >
-                <span class={styles.repoIcon}>{"\uD83D\uDCC1"}</span>
+                <span class={styles.repoIcon}><Folder size={14} /></span>
                 <Show when={!isCollapsed()}>
                   <span class={styles.repoName}>{repo.name}</span>
                 </Show>
@@ -89,7 +96,7 @@ const Sidebar: Component<SidebarProps> = (props) => {
           onClick={props.onSettingsClick}
           title={"\u8BBE\u7F6E"}
         >
-          <span class={styles.settingsIcon}>{"\u2699"}</span>
+          <span class={styles.settingsIcon}><Settings size={16} /></span>
           <Show when={!isCollapsed()}>
             <span class={styles.settingsLabel}>{"\u8BBE\u7F6E"}</span>
           </Show>

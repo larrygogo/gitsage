@@ -1,4 +1,8 @@
 import { type Component, Show } from "solid-js";
+import GitBranch from "lucide-solid/icons/git-branch";
+import ArrowUp from "lucide-solid/icons/arrow-up";
+import ArrowDown from "lucide-solid/icons/arrow-down";
+import Check from "lucide-solid/icons/check";
 import type { RepoOperationState } from "@/types";
 import styles from "./StatusBar.module.css";
 
@@ -48,7 +52,7 @@ const StatusBar: Component<StatusBarProps> = (props) => {
         onClick={props.onBranchClick}
         title="点击切换分支"
       >
-        <span class={styles.branchIcon}>{"\u2442"}</span>
+        <span class={styles.branchIcon}><GitBranch size={12} /></span>
         <span class={styles.branchName}>{branchName()}</span>
       </div>
 
@@ -88,18 +92,18 @@ const StatusBar: Component<StatusBarProps> = (props) => {
       >
         <Show when={ahead() > 0}>
           <span class={`${styles.syncIndicator} ${styles.ahead}`}>
-            <span class={styles.syncArrow}>{"\u2191"}</span>
+            <span class={styles.syncArrow}><ArrowUp size={10} /></span>
             <span class={styles.syncCount}>{ahead()}</span>
           </span>
         </Show>
         <Show when={behind() > 0}>
           <span class={`${styles.syncIndicator} ${styles.behind}`}>
-            <span class={styles.syncArrow}>{"\u2193"}</span>
+            <span class={styles.syncArrow}><ArrowDown size={10} /></span>
             <span class={styles.syncCount}>{behind()}</span>
           </span>
         </Show>
         <Show when={ahead() === 0 && behind() === 0}>
-          <span>{"\u2713 \u5DF2\u540C\u6B65"}</span>
+          <span><Check size={10} /> 已同步</span>
         </Show>
       </div>
 

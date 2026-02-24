@@ -1,4 +1,17 @@
 import { type Component, createSignal, Show, For } from "solid-js";
+import RefreshCw from "lucide-solid/icons/refresh-cw";
+import ArrowDown from "lucide-solid/icons/arrow-down";
+import ArrowUp from "lucide-solid/icons/arrow-up";
+import GitBranch from "lucide-solid/icons/git-branch";
+import Cloud from "lucide-solid/icons/cloud";
+import GitMerge from "lucide-solid/icons/git-merge";
+import ArrowRightLeft from "lucide-solid/icons/arrow-right-left";
+import Pencil from "lucide-solid/icons/pencil";
+import Trash2 from "lucide-solid/icons/trash-2";
+import Tag from "lucide-solid/icons/tag";
+import ChevronDown from "lucide-solid/icons/chevron-down";
+import ChevronRight from "lucide-solid/icons/chevron-right";
+import CornerDownLeft from "lucide-solid/icons/corner-down-left";
 import { Button } from "@/components/ui";
 import type { BranchInfo, TagInfo } from "@/types";
 import styles from "./BranchesView.module.css";
@@ -122,10 +135,10 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
     return (
       <span class={styles.trackingInfo}>
         <Show when={branch.ahead > 0}>
-          <span class={styles.ahead}>{"\u2191"}{branch.ahead}</span>
+          <span class={styles.ahead}><ArrowUp size={10} />{branch.ahead}</span>
         </Show>
         <Show when={branch.behind > 0}>
-          <span class={styles.behind}>{"\u2193"}{branch.behind}</span>
+          <span class={styles.behind}><ArrowDown size={10} />{branch.behind}</span>
         </Show>
       </span>
     );
@@ -149,7 +162,7 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
             disabled={syncing()}
             title="Fetch - 获取远程更新"
           >
-            <span>{"\u21BB"}</span>
+            <RefreshCw size={12} />
             Fetch
           </button>
           <button
@@ -163,7 +176,7 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
             disabled={syncing()}
             title="Pull - 拉取远程变更"
           >
-            <span>{"\u2193"}</span>
+            <ArrowDown size={12} />
             Pull
           </button>
           <button
@@ -177,7 +190,7 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
             disabled={syncing()}
             title="Push - 推送本地变更"
           >
-            <span>{"\u2191"}</span>
+            <ArrowUp size={12} />
             Push
           </button>
           <button
@@ -191,7 +204,7 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
             disabled={syncing()}
             title="Pull (Rebase) - 变基拉取"
           >
-            <span>{"\u21BB"}</span>
+            <RefreshCw size={12} />
             Pull Rebase
           </button>
         </div>
@@ -243,7 +256,7 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
                   <div
                     class={`${styles.branchItem} ${branch.is_head ? styles.current : ""}`}
                   >
-                    <span class={styles.branchIcon}>{"\u2442"}</span>
+                    <span class={styles.branchIcon}><GitBranch size={14} /></span>
                     <Show
                       when={renamingBranch() !== branch.name}
                       fallback={
@@ -281,35 +294,35 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
                           onClick={() => handleCheckout(branch.name)}
                           title="切换到此分支"
                         >
-                          {"\u21B5"} 切换
+                          <CornerDownLeft size={12} /> 切换
                         </button>
                         <button
                           class={styles.branchActionBtn}
                           onClick={() => handleMerge(branch.name)}
                           title="合并到当前分支"
                         >
-                          {"\u2934"} 合并
+                          <GitMerge size={12} /> 合并
                         </button>
                         <button
                           class={styles.branchActionBtn}
                           onClick={() => handleRebase(branch.name)}
                           title="变基到此分支"
                         >
-                          {"\u21A0"} 变基
+                          <ArrowRightLeft size={12} /> 变基
                         </button>
                         <button
                           class={styles.branchActionBtn}
                           onClick={() => handleStartRename(branch.name)}
                           title="重命名"
                         >
-                          {"\u270E"}
+                          <Pencil size={12} />
                         </button>
                         <button
                           class={`${styles.branchActionBtn} ${styles.danger}`}
                           onClick={() => handleDelete(branch.name)}
                           title="删除分支"
                         >
-                          {"\u2715"}
+                          <Trash2 size={12} />
                         </button>
                       </div>
                     </Show>
@@ -338,7 +351,7 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
               <For each={remoteBranches()}>
                 {(branch) => (
                   <div class={styles.branchItem}>
-                    <span class={styles.branchIcon}>{"\u2601"}</span>
+                    <span class={styles.branchIcon}><Cloud size={14} /></span>
                     <span class={styles.branchName}>{branch.name}</span>
                     {renderTrackingInfo(branch)}
                     <div class={styles.branchActions}>
@@ -347,7 +360,7 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
                         onClick={() => handleCheckout(branch.name)}
                         title="检出远程分支"
                       >
-                        {"\u21B5"} 检出
+                        <CornerDownLeft size={12} /> 检出
                       </button>
                     </div>
                   </div>
@@ -364,7 +377,7 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
               style={{ display: "flex", "align-items": "center", gap: "6px", background: "none", border: "none", cursor: "pointer", color: "inherit", "font-size": "inherit", "font-weight": "inherit" }}
               onClick={() => setShowTagSection(!showTagSection())}
             >
-              <span style={{ "font-size": "10px" }}>{showTagSection() ? "\u25BC" : "\u25B6"}</span>
+              {showTagSection() ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
               标签
             </button>
             <span class={styles.groupCount}>{tags().length}</span>
@@ -400,7 +413,7 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
                 <For each={tags()}>
                   {(tag) => (
                     <div class={styles.branchItem}>
-                      <span class={styles.branchIcon}>{"\u{1F3F7}"}</span>
+                      <span class={styles.branchIcon}><Tag size={14} /></span>
                       <span class={styles.branchName}>{tag.name}</span>
                       <Show when={!tag.is_lightweight}>
                         <span style={{ "font-size": "10px", color: "var(--gs-text-muted)" }}>
@@ -412,7 +425,7 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
                           class={`${styles.branchActionBtn} ${styles.danger}`}
                           onClick={() => props.onDeleteTag?.(tag.name)}
                           title="删除标签"
-                        >{"\u2715"}</button>
+                        ><Trash2 size={12} /></button>
                       </div>
                     </div>
                   )}

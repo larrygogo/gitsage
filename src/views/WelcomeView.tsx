@@ -1,4 +1,8 @@
 import { type Component, createSignal, Show, For, onMount } from "solid-js";
+import FolderOpen from "lucide-solid/icons/folder-open";
+import Download from "lucide-solid/icons/download";
+import Plus from "lucide-solid/icons/plus";
+import Folder from "lucide-solid/icons/folder";
 import type { RepoEntry } from "@/types";
 import styles from "./WelcomeView.module.css";
 
@@ -52,7 +56,7 @@ const WelcomeView: Component<WelcomeViewProps> = (props) => {
       {/* 操作按钮 */}
       <div class={styles.actions}>
         <button class={styles.actionBtn} onClick={handleOpenRepo}>
-          <span class={styles.actionIcon}>{"\uD83D\uDCC2"}</span>
+          <span class={styles.actionIcon}><FolderOpen size={24} /></span>
           <div class={styles.actionInfo}>
             <span class={styles.actionLabel}>打开仓库</span>
             <span class={styles.actionDesc}>打开本地已有的 Git 仓库</span>
@@ -60,7 +64,7 @@ const WelcomeView: Component<WelcomeViewProps> = (props) => {
         </button>
 
         <button class={styles.actionBtn} onClick={handleCloneRepo}>
-          <span class={styles.actionIcon}>{"\u2B07"}</span>
+          <span class={styles.actionIcon}><Download size={24} /></span>
           <div class={styles.actionInfo}>
             <span class={styles.actionLabel}>克隆仓库</span>
             <span class={styles.actionDesc}>从远程 URL 克隆仓库到本地</span>
@@ -68,7 +72,7 @@ const WelcomeView: Component<WelcomeViewProps> = (props) => {
         </button>
 
         <button class={styles.actionBtn} onClick={handleInitRepo}>
-          <span class={styles.actionIcon}>{"\u2795"}</span>
+          <span class={styles.actionIcon}><Plus size={24} /></span>
           <div class={styles.actionInfo}>
             <span class={styles.actionLabel}>初始化仓库</span>
             <span class={styles.actionDesc}>在本地文件夹中创建新的 Git 仓库</span>
@@ -92,7 +96,7 @@ const WelcomeView: Component<WelcomeViewProps> = (props) => {
                   class={styles.recentItem}
                   onClick={() => handleRecentClick(entry)}
                 >
-                  <span class={styles.recentIcon}>{"\uD83D\uDCC1"}</span>
+                  <span class={styles.recentIcon}><Folder size={16} /></span>
                   <div class={styles.recentInfo}>
                     <span class={styles.recentName}>{entry.name}</span>
                     <span class={styles.recentPath}>{entry.path}</span>

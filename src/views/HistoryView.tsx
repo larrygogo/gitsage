@@ -1,4 +1,5 @@
 import { type Component, createSignal, createEffect, Show, For, onMount } from "solid-js";
+import History from "lucide-solid/icons/history";
 import { Button } from "@/components/ui";
 import type { CommitInfo, DiffOutput } from "@/types";
 import * as gitService from "@/services/git";
@@ -155,7 +156,7 @@ const HistoryView: Component<HistoryViewProps> = (props) => {
           when={commits().length > 0}
           fallback={
             <div class={styles.emptyState}>
-              <span class={styles.emptyIcon}>{"\u29D6"}</span>
+              <span class={styles.emptyIcon}><History size={36} /></span>
               <span class={styles.emptyText}>暂无提交记录</span>
             </div>
           }
