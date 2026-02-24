@@ -1,0 +1,81 @@
+/*
+ * GitSage Dark Theme
+ * 暗色主题 CSS 变量定义（VS Code 风格深色方案）
+ */
+
+[data-theme="dark"] {
+  /* ========== 背景色 ========== */
+  --gs-bg-primary: #1e1e2e;
+  --gs-bg-secondary: #181825;
+  --gs-bg-tertiary: #262637;
+
+  /* ========== 文字色 ========== */
+  --gs-text-primary: #cdd6f4;
+  --gs-text-secondary: #a6adc8;
+  --gs-text-muted: #6c7086;
+
+  /* ========== 边框色 ========== */
+  --gs-border-primary: #383a5c;
+  --gs-border-secondary: #2e2e48;
+  --gs-border-focus: #89b4fa;
+
+  /* ========== 强调色 / 品牌色（蓝色系） ========== */
+  --gs-accent-primary: #89b4fa;
+  --gs-accent-hover: #74a8fc;
+  --gs-accent-active: #5b9afd;
+  --gs-accent-subtle: #1e2a45;
+  --gs-accent-text: #b4d0fb;
+
+  /* ========== 语义色 - 成功 ========== */
+  --gs-success-bg: #0d2818;
+  --gs-success-text: #a6e3a1;
+  --gs-success-border: #40a040;
+  --gs-success-solid: #a6e3a1;
+
+  /* ========== 语义色 - 警告 ========== */
+  --gs-warning-bg: #2d2206;
+  --gs-warning-text: #f9e2af;
+  --gs-warning-border: #b8860b;
+  --gs-warning-solid: #f9e2af;
+
+  /* ========== 语义色 - 错误 ========== */
+  --gs-error-bg: #2d0f0f;
+  --gs-error-text: #f38ba8;
+  --gs-error-border: #a03030;
+  --gs-error-solid: #f38ba8;
+
+  /* ========== Diff 专用色 ========== */
+  /* Added（绿） */
+  --gs-diff-added-bg: #12261e;
+  --gs-diff-added-text: #a6e3a1;
+  --gs-diff-added-line-bg: #1a3a2a;
+  --gs-diff-added-word-bg: #2d5a3d;
+
+  /* Deleted（红） */
+  --gs-diff-deleted-bg: #2d1219;
+  --gs-diff-deleted-text: #f38ba8;
+  --gs-diff-deleted-line-bg: #3d1a25;
+  --gs-diff-deleted-word-bg: #5c2535;
+
+  /* Modified（蓝） */
+  --gs-diff-modified-bg: #1a2740;
+  --gs-diff-modified-text: #89b4fa;
+  --gs-diff-modified-line-bg: #1e3355;
+  --gs-diff-modified-word-bg: #2a4a7a;
+
+  /* Diff 行号与分隔 */
+  --gs-diff-hunk-bg: #1a2740;
+  --gs-diff-hunk-text: #89b4fa;
+  --gs-diff-line-number: #6c7086;
+  --gs-diff-gutter-bg: #181825;
+
+  /* ========== 阴影 ========== */
+  --gs-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --gs-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --gs-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+
+  /* ========== 滚动条 ========== */
+  --gs-scrollbar-track: #181825;
+  --gs-scrollbar-thumb: #383a5c;
+  --gs-scrollbar-thumb-hover: #4a4c72;
+}

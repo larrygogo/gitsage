@@ -1,0 +1,46 @@
+{
+  "app": {
+    "name": "GitSage"
+  },
+  "sidebar": {
+    "workspace": "工作区",
+    "history": "历史记录",
+    "branches": "分支"
+  },
+  "workspace": {
+    "staged": "暂存区",
+    "unstaged": "未暂存",
+    "commit": "提交",
+    "commitMessage": "输入提交信息...",
+    "aiGenerate": "AI 生成",
+    "stageAll": "暂存全部",
+    "unstageAll": "取消全部暂存",
+    "noChanges": "没有文件变更",
+    "diffPlaceholder": "选择一个文件以查看差异"
+  },
+  "history": {
+    "title": "提交历史",
+    "noCommits": "暂无提交记录",
+    "loading": "加载中..."
+  },
+  "branches": {
+    "title": "分支管理",
+    "local": "本地分支",
+    "remote": "远程分支",
+    "current": "当前",
+    "create": "新建分支",
+    "checkout": "切换",
+    "delete": "删除",
+    "noBranches": "暂无分支",
+    "newBranchName": "输入新分支名称..."
+  },
+  "welcome": {
+    "title": "欢迎使用 GitSage",
+    "subtitle": "智能 Git 可视化管理工具",
+    "open": "打开仓库",
+    "clone": "克隆仓库",
+    "init": "初始化仓库",
+    "recent": "最近打开",
+    "noRecent": "暂无最近打开的仓库"
+  }
+}

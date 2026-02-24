@@ -1,0 +1,46 @@
+{
+  "app": {
+    "name": "GitSage"
+  },
+  "sidebar": {
+    "workspace": "Workspace",
+    "history": "History",
+    "branches": "Branches"
+  },
+  "workspace": {
+    "staged": "Staged",
+    "unstaged": "Unstaged",
+    "commit": "Commit",
+    "commitMessage": "Enter commit message...",
+    "aiGenerate": "AI Generate",
+    "stageAll": "Stage All",
+    "unstageAll": "Unstage All",
+    "noChanges": "No file changes",
+    "diffPlaceholder": "Select a file to view diff"
+  },
+  "history": {
+    "title": "Commit History",
+    "noCommits": "No commits yet",
+    "loading": "Loading..."
+  },
+  "branches": {
+    "title": "Branch Management",
+    "local": "Local Branches",
+    "remote": "Remote Branches",
+    "current": "Current",
+    "create": "New Branch",
+    "checkout": "Checkout",
+    "delete": "Delete",
+    "noBranches": "No branches",
+    "newBranchName": "Enter new branch name..."
+  },
+  "welcome": {
+    "title": "Welcome to GitSage",
+    "subtitle": "Intelligent Git Visual Manager",
+    "open": "Open Repository",
+    "clone": "Clone Repository",
+    "init": "Initialize Repository",
+    "recent": "Recent",
+    "noRecent": "No recently opened repositories"
+  }
+}

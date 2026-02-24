@@ -1,0 +1,113 @@
+/* ── Toolbar ── */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 12px;
+  background-color: var(--gs-bg-secondary);
+  border-bottom: 1px solid var(--gs-border-secondary);
+  gap: 12px;
+  user-select: none;
+}
+
+/* ── Repo info ── */
+
+.repoInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.repoName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gs-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.separator {
+  color: var(--gs-text-muted);
+  font-size: 13px;
+}
+
+.branchBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background-color: var(--gs-accent-subtle);
+  color: var(--gs-accent-primary);
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.branchIcon {
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+/* ── Spacer ── */
+
+.spacer {
+  flex: 1;
+}
+
+/* ── Sync actions ── */
+
+.syncActions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.syncBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 8px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--gs-text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.syncBtn:hover {
+  background-color: var(--gs-accent-subtle);
+  color: var(--gs-text-primary);
+  border-color: var(--gs-border-secondary);
+}
+
+.syncBtn:active {
+  background-color: var(--gs-accent-subtle);
+  color: var(--gs-accent-primary);
+}
+
+.syncBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.syncIcon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.syncLabel {
+  font-size: 12px;
+}

@@ -1,0 +1,260 @@
+/* ── BranchesView ── */
+
+.branches {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background-color: var(--gs-bg-secondary);
+  border-bottom: 1px solid var(--gs-border-secondary);
+  user-select: none;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gs-text-primary);
+}
+
+/* ── Create branch ── */
+
+.createSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--gs-border-secondary);
+}
+
+.createInput {
+  flex: 1;
+  height: 30px;
+  padding: 0 10px;
+  background-color: var(--gs-bg-primary);
+  border: 1px solid var(--gs-border-primary);
+  border-radius: 4px;
+  color: var(--gs-text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.createInput:focus {
+  border-color: var(--gs-border-focus);
+}
+
+.createInput::placeholder {
+  color: var(--gs-text-muted);
+}
+
+/* ── Branch groups ── */
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.group {
+  padding: 0;
+}
+
+.group + .group {
+  border-top: 1px solid var(--gs-border-secondary);
+}
+
+.groupHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: var(--gs-bg-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gs-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  user-select: none;
+}
+
+.groupCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background-color: var(--gs-accent-subtle);
+  color: var(--gs-accent-primary);
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.branchList {
+  padding: 4px 0;
+}
+
+/* ── Branch item ── */
+
+.branchItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 16px;
+  transition: background-color 0.1s ease;
+}
+
+.branchItem:hover {
+  background-color: var(--gs-accent-subtle);
+}
+
+.branchItem.current {
+  background-color: var(--gs-accent-subtle);
+}
+
+.branchIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  font-size: 14px;
+  color: var(--gs-text-muted);
+  flex-shrink: 0;
+}
+
+.branchItem.current .branchIcon {
+  color: var(--gs-accent-primary);
+}
+
+.branchName {
+  flex: 1;
+  font-size: 13px;
+  color: var(--gs-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.branchItem.current .branchName {
+  font-weight: 600;
+  color: var(--gs-accent-primary);
+}
+
+.currentBadge {
+  display: inline-flex;
+  padding: 1px 6px;
+  background-color: var(--gs-accent-primary);
+  color: #ffffff;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.trackingInfo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--gs-text-muted);
+  flex-shrink: 0;
+}
+
+.trackingInfo .ahead {
+  color: var(--gs-success-text);
+}
+
+.trackingInfo .behind {
+  color: var(--gs-warning-text);
+}
+
+/* ── Branch actions ── */
+
+.branchActions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.branchItem:hover .branchActions {
+  opacity: 1;
+}
+
+.branchActionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: var(--gs-text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.branchActionBtn:hover {
+  background-color: var(--gs-bg-tertiary);
+  color: var(--gs-text-primary);
+}
+
+.branchActionBtn.danger:hover {
+  background-color: var(--gs-error-bg);
+  color: var(--gs-error-text);
+}
+
+/* ── Empty state ── */
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 1;
+  padding: 48px 24px;
+  color: var(--gs-text-muted);
+}
+
+.emptyIcon {
+  font-size: 36px;
+  opacity: 0.5;
+}
+
+.emptyText {
+  font-size: 14px;
+}
+
+/* ── Scrollbar ── */
+
+.content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.content::-webkit-scrollbar-thumb {
+  background-color: var(--gs-scrollbar-thumb);
+  border-radius: 4px;
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+  background-color: var(--gs-scrollbar-thumb-hover);
+}

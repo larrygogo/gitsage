@@ -1,0 +1,48 @@
+/* ── VirtualList 虚拟滚动列表 ── */
+
+.container {
+  overflow-y: auto;
+  position: relative;
+  will-change: transform;
+}
+
+/* 自定义滚动条 */
+.container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.container::-webkit-scrollbar-track {
+  background: var(--gs-scrollbar-track);
+}
+
+.container::-webkit-scrollbar-thumb {
+  background: var(--gs-scrollbar-thumb);
+  border-radius: 4px;
+}
+
+.container::-webkit-scrollbar-thumb:hover {
+  background: var(--gs-scrollbar-thumb-hover);
+}
+
+/* 撑高容器的占位元素 */
+.sentinel {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 可见区域的内容包裹层 */
+.viewport {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  will-change: transform;
+}
+
+/* 单行条目 */
+.item {
+  box-sizing: border-box;
+  width: 100%;
+  overflow: hidden;
+}

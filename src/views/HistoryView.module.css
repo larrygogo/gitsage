@@ -1,0 +1,153 @@
+/* ── HistoryView ── */
+
+.history {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background-color: var(--gs-bg-secondary);
+  border-bottom: 1px solid var(--gs-border-secondary);
+  user-select: none;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gs-text-primary);
+}
+
+.commitCount {
+  font-size: 12px;
+  color: var(--gs-text-muted);
+}
+
+/* ── Commit list ── */
+
+.commitList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.commitItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--gs-border-secondary);
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.commitItem:hover {
+  background-color: var(--gs-accent-subtle);
+}
+
+.commitItem:last-child {
+  border-bottom: none;
+}
+
+.commitTopRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.commitHash {
+  display: inline-flex;
+  padding: 1px 6px;
+  background-color: var(--gs-bg-tertiary);
+  border-radius: 4px;
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", "Source Code Pro", Consolas, monospace;
+  font-size: 12px;
+  color: var(--gs-accent-primary);
+  flex-shrink: 0;
+  user-select: all;
+}
+
+.commitSummary {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gs-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.commitBottomRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 0;
+}
+
+.commitAuthor {
+  font-size: 12px;
+  color: var(--gs-text-secondary);
+}
+
+.commitTime {
+  font-size: 12px;
+  color: var(--gs-text-muted);
+  margin-left: auto;
+}
+
+/* ── Empty state ── */
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 1;
+  padding: 48px 24px;
+  color: var(--gs-text-muted);
+}
+
+.emptyIcon {
+  font-size: 36px;
+  opacity: 0.5;
+}
+
+.emptyText {
+  font-size: 14px;
+}
+
+/* ── Loading ── */
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  color: var(--gs-text-muted);
+  font-size: 13px;
+}
+
+/* ── Scrollbar ── */
+
+.commitList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.commitList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.commitList::-webkit-scrollbar-thumb {
+  background-color: var(--gs-scrollbar-thumb);
+  border-radius: 4px;
+}
+
+.commitList::-webkit-scrollbar-thumb:hover {
+  background-color: var(--gs-scrollbar-thumb-hover);
+}

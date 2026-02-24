@@ -1,0 +1,88 @@
+/* ── SplitPane 分割面板 ── */
+
+.container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.horizontal {
+  flex-direction: row;
+}
+
+.vertical {
+  flex-direction: column;
+}
+
+/* ── 面板区域 ── */
+
+.pane {
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── 拖拽分割线 ── */
+
+.divider {
+  flex-shrink: 0;
+  background-color: var(--gs-border-primary);
+  position: relative;
+  z-index: 1;
+  transition: background-color 0.15s ease;
+}
+
+.divider::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+}
+
+/* 水平方向（左右分割）：分割线为竖线 */
+.horizontal > .divider {
+  width: 1px;
+  cursor: col-resize;
+}
+
+.horizontal > .divider::after {
+  top: 0;
+  bottom: 0;
+  left: -3px;
+  right: -3px;
+}
+
+/* 垂直方向（上下分割）：分割线为横线 */
+.vertical > .divider {
+  height: 1px;
+  cursor: row-resize;
+}
+
+.vertical > .divider::after {
+  left: 0;
+  right: 0;
+  top: -3px;
+  bottom: -3px;
+}
+
+/* 悬停与拖拽中高亮 */
+.divider:hover,
+.dividerActive {
+  background-color: var(--gs-accent-primary);
+}
+
+/* ── 拖拽遮罩层 ── */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: transparent;
+}
+
+.overlay.horizontal {
+  cursor: col-resize;
+}
+
+.overlay.vertical {
+  cursor: row-resize;
+}

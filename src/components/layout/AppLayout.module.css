@@ -1,0 +1,57 @@
+/* ── AppLayout ── */
+
+.appLayout {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "sidebar toolbar"
+    "sidebar main"
+    "statusbar statusbar";
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--gs-bg-primary);
+  color: var(--gs-text-primary);
+}
+
+.sidebarArea {
+  grid-area: sidebar;
+  overflow: hidden;
+}
+
+.toolbarArea {
+  grid-area: toolbar;
+  overflow: hidden;
+}
+
+.mainArea {
+  grid-area: main;
+  overflow: auto;
+  position: relative;
+}
+
+.statusBarArea {
+  grid-area: statusbar;
+  overflow: hidden;
+}
+
+/* ── Scrollbar for main area ── */
+
+.mainArea::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.mainArea::-webkit-scrollbar-track {
+  background: var(--gs-scrollbar-track);
+}
+
+.mainArea::-webkit-scrollbar-thumb {
+  background-color: var(--gs-scrollbar-thumb);
+  border-radius: 4px;
+}
+
+.mainArea::-webkit-scrollbar-thumb:hover {
+  background-color: var(--gs-scrollbar-thumb-hover);
+}

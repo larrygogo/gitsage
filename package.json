@@ -1,0 +1,24 @@
+{
+  "name": "gitsage",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@solidjs/router": "^0.15.3",
+    "@tauri-apps/api": "^2.3.0",
+    "@tauri-apps/plugin-shell": "^2.2.1",
+    "solid-js": "^1.9.5"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.4.0",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.4",
+    "vite-plugin-solid": "^2.11.0"
+  }
+}
