@@ -64,3 +64,81 @@ export interface RepoEntry {
   name: string;
   last_opened: string;
 }
+
+// ==================== Phase 1 类型 ====================
+
+export interface StashEntry {
+  index: number;
+  message: string;
+  timestamp: number;
+}
+
+export type RepoOperationState = 'Normal' | 'Merging' | 'Rebasing' | 'CherryPicking' | 'Reverting';
+
+// ==================== Phase 2 类型 ====================
+
+export interface TagInfo {
+  name: string;
+  target_id: string;
+  message: string | null;
+  tagger: string | null;
+  timestamp: number | null;
+  is_lightweight: boolean;
+}
+
+export interface RemoteInfo {
+  name: string;
+  url: string;
+  fetch_url: string | null;
+}
+
+// ==================== Phase 3 类型 ====================
+
+export interface ConflictFile {
+  path: string;
+  has_base: boolean;
+  has_ours: boolean;
+  has_theirs: boolean;
+}
+
+export interface ConflictVersions {
+  base: string | null;
+  ours: string | null;
+  theirs: string | null;
+}
+
+// ==================== Phase 4 类型 ====================
+
+export interface BlameLine {
+  line_no: number;
+  commit_id: string;
+  author_name: string;
+  author_email: string;
+  timestamp: number;
+  content: string;
+}
+
+// ==================== Phase 5 类型 ====================
+
+export type ChangeType = 'Added' | 'Modified' | 'Deleted';
+
+export interface LineChange {
+  start_line: number;
+  end_line: number;
+  change_type: ChangeType;
+}
+
+export interface SubmoduleInfo {
+  name: string;
+  path: string;
+  url: string;
+  head_id: string | null;
+  is_initialized: boolean;
+}
+
+export interface WorktreeInfo {
+  path: string;
+  branch: string;
+  head_id: string;
+  is_main: boolean;
+}

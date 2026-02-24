@@ -59,3 +59,14 @@ pub async fn close_repo(state: State<'_, AppState>) -> Result<(), AppError> {
     *state.current_repo.lock().await = None;
     Ok(())
 }
+
+// ==================== Phase 2: Clone ====================
+
+#[tauri::command]
+pub async fn clone_repo(
+    url: String,
+    dest_path: String,
+) -> Result<(), AppError> {
+    let dest = PathBuf::from(&dest_path);
+    crate::git::cli::clone_repo(&url, &dest).await
+}

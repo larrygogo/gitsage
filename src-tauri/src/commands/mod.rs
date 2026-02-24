@@ -1,6 +1,11 @@
 pub mod ai;
 pub mod branch;
 pub mod commit;
+pub mod merge;
 pub mod remote;
 pub mod repo;
+pub mod stash;
+pub mod submodule;
+pub mod tag;
+pub mod worktree;
 pub mod workspace;

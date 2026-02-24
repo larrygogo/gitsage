@@ -1,53 +1,57 @@
 use tauri::State;
 
 use crate::error::AppError;
-use crate::git::repository::BranchInfo;
+use crate::git::repository::StashEntry;
 use crate::state::AppState;
 
 #[tauri::command]
-pub async fn get_branches(state: State<'_, AppState>) -> Result<Vec<BranchInfo>, AppError> {
-    let repo = state.current_repo.lock().await;
-    let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.branches()
-}
-
-#[tauri::command]
-pub async fn get_current_branch(state: State<'_, AppState>) -> Result<String, AppError> {
-    let repo = state.current_repo.lock().await;
-    let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.current_branch()
-}
-
-#[tauri::command]
-pub async fn create_branch(name: String, state: State<'_, AppState>) -> Result<(), AppError> {
-    let repo = state.current_repo.lock().await;
-    let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.create_branch(&name).await
-}
-
-#[tauri::command]
-pub async fn checkout_branch(name: String, state: State<'_, AppState>) -> Result<(), AppError> {
-    let repo = state.current_repo.lock().await;
-    let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.checkout_branch(&name).await
-}
-
-#[tauri::command]
-pub async fn delete_branch(name: String, state: State<'_, AppState>) -> Result<(), AppError> {
-    let repo = state.current_repo.lock().await;
-    let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.delete_branch(&name).await
-}
-
-// ==================== Phase 2: Rename ====================
-
-#[tauri::command]
-pub async fn rename_branch(
-    old_name: String,
-    new_name: String,
+pub async fn stash_save(
+    message: Option<String>,
+    include_untracked: bool,
     state: State<'_, AppState>,
 ) -> Result<(), AppError> {
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.rename_branch(&old_name, &new_name).await
+    repo.stash_push(message.as_deref(), include_untracked).await
+}
+
+#[tauri::command]
+pub async fn stash_pop(index: Option<usize>, state: State<'_, AppState>) -> Result<(), AppError> {
+    let repo = state.current_repo.lock().await;
+    let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
+    repo.stash_pop(index).await
+}
+
+#[tauri::command]
+pub async fn stash_apply(
+    index: Option<usize>,
+    state: State<'_, AppState>,
+) -> Result<(), AppError> {
+    let repo = state.current_repo.lock().await;
+    let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
+    repo.stash_apply(index).await
+}
+
+#[tauri::command]
+pub async fn stash_drop(
+    index: Option<usize>,
+    state: State<'_, AppState>,
+) -> Result<(), AppError> {
+    let repo = state.current_repo.lock().await;
+    let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
+    repo.stash_drop(index).await
+}
+
+#[tauri::command]
+pub async fn stash_list(state: State<'_, AppState>) -> Result<Vec<StashEntry>, AppError> {
+    let repo = state.current_repo.lock().await;
+    let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
+    repo.stash_list()
+}
+
+#[tauri::command]
+pub async fn stash_clear(state: State<'_, AppState>) -> Result<(), AppError> {
+    let repo = state.current_repo.lock().await;
+    let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
+    repo.stash_clear().await
 }

@@ -1,4 +1,8 @@
-import type { FileStatus, BranchInfo, CommitInfo, DiffOutput, RepoEntry } from '../types';
+import type {
+  FileStatus, BranchInfo, CommitInfo, DiffOutput, RepoEntry,
+  StashEntry, RepoOperationState, TagInfo, RemoteInfo,
+  ConflictFile, ConflictVersions, BlameLine, LineChange, SubmoduleInfo,
+} from '../types';
 import * as ipc from './ipc';
 
 /**
@@ -8,107 +12,358 @@ import * as ipc from './ipc';
 
 // ==================== 仓库管理 ====================
 
-/** 打开一个已有的 Git 仓库 */
 export async function openRepo(path: string): Promise<string> {
   return ipc.openRepo(path);
 }
 
-/** 在指定路径初始化新的 Git 仓库 */
 export async function initRepo(path: string): Promise<string> {
   return ipc.initRepo(path);
 }
 
-/** 关闭当前打开的仓库 */
 export async function closeRepo(): Promise<void> {
   return ipc.closeRepo();
 }
 
-/** 获取最近打开的仓库列表 */
 export async function getRecentRepos(): Promise<RepoEntry[]> {
   return ipc.getRecentRepos();
 }
 
+export async function cloneRepo(url: string, destPath: string): Promise<void> {
+  return ipc.cloneRepo(url, destPath);
+}
+
 // ==================== 文件状态 ====================
 
-/** 获取工作区文件状态列表 */
 export async function getStatus(): Promise<FileStatus[]> {
   return ipc.getStatus();
 }
 
-/** 将指定文件暂存（stage） */
 export async function stageFiles(paths: string[]): Promise<void> {
   return ipc.stageFiles(paths);
 }
 
-/** 取消暂存指定文件 */
 export async function unstageFiles(paths: string[]): Promise<void> {
   return ipc.unstageFiles(paths);
 }
 
-// ==================== Diff ====================
-
-/** 获取指定文件的 diff（工作区变更） */
-export async function getDiff(path: string): Promise<DiffOutput> {
-  return ipc.getDiff(path);
+export async function discardChanges(paths: string[]): Promise<void> {
+  return ipc.discardChanges(paths);
 }
 
-/** 获取已暂存文件的 diff */
+export async function discardAllChanges(): Promise<void> {
+  return ipc.discardAllChanges();
+}
+
+// ==================== Diff ====================
+
+export async function getDiff(path: string, staged: boolean = false): Promise<DiffOutput> {
+  return ipc.getDiff(path, staged);
+}
+
 export async function getStagedDiff(): Promise<DiffOutput> {
   return ipc.getStagedDiff();
 }
 
-// ==================== 提交 ====================
+// ==================== Hunk 操作 ====================
 
-/** 创建一个新的提交 */
-export async function createCommit(message: string): Promise<string> {
-  return ipc.createCommit(message);
+export async function stageHunk(path: string, hunkIndex: number): Promise<void> {
+  return ipc.stageHunk(path, hunkIndex);
 }
 
-/** 获取提交历史 */
+export async function unstageHunk(path: string, hunkIndex: number): Promise<void> {
+  return ipc.unstageHunk(path, hunkIndex);
+}
+
+export async function stageLines(path: string, hunkIndex: number, lineIndices: number[]): Promise<void> {
+  return ipc.stageLines(path, hunkIndex, lineIndices);
+}
+
+export async function discardHunk(path: string, hunkIndex: number): Promise<void> {
+  return ipc.discardHunk(path, hunkIndex);
+}
+
+// ==================== 提交 ====================
+
+export async function createCommit(message: string, amend: boolean = false): Promise<string> {
+  return ipc.createCommit(message, amend);
+}
+
+export async function amendCommit(message: string): Promise<string> {
+  return ipc.amendCommit(message);
+}
+
+export async function undoLastCommit(soft: boolean = true): Promise<void> {
+  return ipc.undoLastCommit(soft);
+}
+
 export async function getCommitLog(limit?: number): Promise<CommitInfo[]> {
   return ipc.getCommitLog(limit);
 }
 
+export async function getCommitLogPaged(maxCount: number, skip: number): Promise<CommitInfo[]> {
+  return ipc.getCommitLogPaged(maxCount, skip);
+}
+
+export async function getBranchLog(branch: string, limit?: number): Promise<CommitInfo[]> {
+  return ipc.getBranchLog(branch, limit);
+}
+
+export async function resetToCommit(commitId: string, mode: string): Promise<void> {
+  return ipc.resetToCommit(commitId, mode);
+}
+
+export async function getCommitDiff(commitId: string): Promise<DiffOutput> {
+  return ipc.getCommitDiff(commitId);
+}
+
+export async function getFileHistory(path: string, limit?: number): Promise<CommitInfo[]> {
+  return ipc.getFileHistory(path, limit);
+}
+
+export async function searchCommits(query: string, limit?: number): Promise<CommitInfo[]> {
+  return ipc.searchCommits(query, limit);
+}
+
 // ==================== 分支操作 ====================
 
-/** 获取所有分支列表 */
 export async function getBranches(): Promise<BranchInfo[]> {
   return ipc.getBranches();
 }
 
-/** 获取当前分支名称 */
 export async function getCurrentBranch(): Promise<string> {
   return ipc.getCurrentBranch();
 }
 
-/** 创建新分支 */
-export async function createBranch(name: string, startPoint?: string): Promise<void> {
-  return ipc.createBranch(name, startPoint);
+export async function createBranch(name: string): Promise<void> {
+  return ipc.createBranch(name);
 }
 
-/** 切换到指定分支 */
 export async function checkoutBranch(name: string): Promise<void> {
   return ipc.checkoutBranch(name);
 }
 
-/** 删除指定分支 */
-export async function deleteBranch(name: string, force?: boolean): Promise<void> {
-  return ipc.deleteBranch(name, force);
+export async function deleteBranch(name: string): Promise<void> {
+  return ipc.deleteBranch(name);
+}
+
+export async function renameBranch(oldName: string, newName: string): Promise<void> {
+  return ipc.renameBranch(oldName, newName);
 }
 
 // ==================== 远程操作 ====================
 
-/** 从远程仓库获取更新（fetch） */
 export async function fetchRemote(remote?: string): Promise<void> {
   return ipc.fetchRemote(remote);
 }
 
-/** 从远程仓库拉取并合并（pull） */
 export async function pullRemote(remote?: string, branch?: string): Promise<void> {
   return ipc.pullRemote(remote, branch);
 }
 
-/** 推送到远程仓库 */
 export async function pushRemote(remote?: string, branch?: string): Promise<void> {
   return ipc.pushRemote(remote, branch);
+}
+
+export async function getRemotes(): Promise<RemoteInfo[]> {
+  return ipc.getRemotes();
+}
+
+export async function addRemote(name: string, url: string): Promise<void> {
+  return ipc.addRemote(name, url);
+}
+
+export async function removeRemote(name: string): Promise<void> {
+  return ipc.removeRemote(name);
+}
+
+export async function renameRemote(oldName: string, newName: string): Promise<void> {
+  return ipc.renameRemote(oldName, newName);
+}
+
+export async function fetchPrune(remote: string): Promise<void> {
+  return ipc.fetchPrune(remote);
+}
+
+export async function pushSetUpstream(remote: string, branch: string): Promise<void> {
+  return ipc.pushSetUpstream(remote, branch);
+}
+
+export async function pullRebase(remote?: string, branch?: string): Promise<void> {
+  return ipc.pullRebase(remote, branch);
+}
+
+export async function syncRemote(remote?: string, branch?: string): Promise<void> {
+  return ipc.syncRemote(remote, branch);
+}
+
+// ==================== Stash ====================
+
+export async function stashSave(message?: string, includeUntracked?: boolean): Promise<void> {
+  return ipc.stashSave(message, includeUntracked);
+}
+
+export async function stashPop(index?: number): Promise<void> {
+  return ipc.stashPop(index);
+}
+
+export async function stashApply(index?: number): Promise<void> {
+  return ipc.stashApply(index);
+}
+
+export async function stashDrop(index?: number): Promise<void> {
+  return ipc.stashDrop(index);
+}
+
+export async function stashList(): Promise<StashEntry[]> {
+  return ipc.stashList();
+}
+
+export async function stashClear(): Promise<void> {
+  return ipc.stashClear();
+}
+
+// ==================== Merge / Cherry-pick / Revert / Rebase ====================
+
+export async function mergeBranch(branch: string, noFf?: boolean): Promise<string> {
+  return ipc.mergeBranch(branch, noFf);
+}
+
+export async function mergeAbort(): Promise<void> {
+  return ipc.mergeAbort();
+}
+
+export async function mergeContinue(): Promise<void> {
+  return ipc.mergeContinue();
+}
+
+export async function getRepoState(): Promise<RepoOperationState> {
+  return ipc.getRepoState();
+}
+
+export async function cherryPick(commitId: string): Promise<void> {
+  return ipc.cherryPick(commitId);
+}
+
+export async function cherryPickAbort(): Promise<void> {
+  return ipc.cherryPickAbort();
+}
+
+export async function cherryPickContinue(): Promise<void> {
+  return ipc.cherryPickContinue();
+}
+
+export async function revertCommit(commitId: string): Promise<void> {
+  return ipc.revertCommit(commitId);
+}
+
+export async function revertAbort(): Promise<void> {
+  return ipc.revertAbort();
+}
+
+export async function revertContinue(): Promise<void> {
+  return ipc.revertContinue();
+}
+
+export async function rebaseOnto(onto: string): Promise<void> {
+  return ipc.rebaseOnto(onto);
+}
+
+export async function rebaseAbort(): Promise<void> {
+  return ipc.rebaseAbort();
+}
+
+export async function rebaseContinue(): Promise<void> {
+  return ipc.rebaseContinue();
+}
+
+export async function rebaseSkip(): Promise<void> {
+  return ipc.rebaseSkip();
+}
+
+// ==================== Tag ====================
+
+export async function getTags(): Promise<TagInfo[]> {
+  return ipc.getTags();
+}
+
+export async function createTag(name: string, message?: string, commit?: string): Promise<void> {
+  return ipc.createTag(name, message, commit);
+}
+
+export async function deleteTag(name: string): Promise<void> {
+  return ipc.deleteTag(name);
+}
+
+export async function pushTag(remote: string, tag: string): Promise<void> {
+  return ipc.pushTag(remote, tag);
+}
+
+export async function pushAllTags(remote: string): Promise<void> {
+  return ipc.pushAllTags(remote);
+}
+
+// ==================== Conflict ====================
+
+export async function getConflictFiles(): Promise<ConflictFile[]> {
+  return ipc.getConflictFiles();
+}
+
+export async function getConflictVersions(path: string): Promise<ConflictVersions> {
+  return ipc.getConflictVersions(path);
+}
+
+export async function markResolved(path: string): Promise<void> {
+  return ipc.markResolved(path);
+}
+
+export async function writeMergeResult(path: string, content: string): Promise<void> {
+  return ipc.writeMergeResult(path, content);
+}
+
+// ==================== Blame ====================
+
+export async function getBlame(path: string): Promise<BlameLine[]> {
+  return ipc.getBlame(path);
+}
+
+// ==================== Line Changes & Gitignore ====================
+
+export async function getLineChanges(path: string): Promise<LineChange[]> {
+  return ipc.getLineChanges(path);
+}
+
+export async function addToGitignore(pattern: string): Promise<void> {
+  return ipc.addToGitignore(pattern);
+}
+
+// ==================== Submodule ====================
+
+export async function getSubmodules(): Promise<SubmoduleInfo[]> {
+  return ipc.getSubmodules();
+}
+
+export async function submoduleInit(): Promise<void> {
+  return ipc.submoduleInit();
+}
+
+export async function submoduleUpdate(recursive?: boolean): Promise<void> {
+  return ipc.submoduleUpdate(recursive);
+}
+
+export async function submoduleAdd(url: string, path: string): Promise<void> {
+  return ipc.submoduleAdd(url, path);
+}
+
+// ==================== Worktree ====================
+
+export async function worktreeAdd(path: string, branch: string): Promise<void> {
+  return ipc.worktreeAdd(path, branch);
+}
+
+export async function worktreeRemove(path: string): Promise<void> {
+  return ipc.worktreeRemove(path);
+}
+
+export async function worktreeList(): Promise<string> {
+  return ipc.worktreeList();
 }

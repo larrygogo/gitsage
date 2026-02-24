@@ -22,13 +22,8 @@ const WelcomeView: Component<WelcomeViewProps> = (props) => {
     }
   });
 
-  const handleOpenRepo = async () => {
-    try {
-      // TODO: 调用 Tauri 文件选择对话框
-      console.log("[WelcomeView] open repo");
-    } catch (err) {
-      console.error("[WelcomeView] 打开仓库失败:", err);
-    }
+  const handleOpenRepo = () => {
+    props.onOpenRepo?.("");
   };
 
   const handleCloneRepo = () => {

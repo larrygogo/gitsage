@@ -1,32 +1,51 @@
-import { type Component, createSignal, Show, For, onMount } from "solid-js";
+import { type Component, createSignal, Show, For } from "solid-js";
 import { Button } from "@/components/ui";
-import type { BranchInfo } from "@/types";
+import type { BranchInfo, TagInfo } from "@/types";
 import styles from "./BranchesView.module.css";
 
-const BranchesView: Component = () => {
-  const [branches, setBranches] = createSignal<BranchInfo[]>([]);
-  const [newBranchName, setNewBranchName] = createSignal("");
+export interface BranchesViewProps {
+  branches?: BranchInfo[];
+  tags?: TagInfo[];
+  currentBranch?: string;
+  onCreateBranch?: (name: string) => Promise<void>;
+  onCheckoutBranch?: (name: string) => Promise<void>;
+  onDeleteBranch?: (name: string) => Promise<void>;
+  onRenameBranch?: (oldName: string, newName: string) => Promise<void>;
+  onMergeBranch?: (branch: string, noFf?: boolean) => Promise<void>;
+  onRebaseOnto?: (onto: string) => Promise<void>;
+  onCreateTag?: (name: string, message?: string) => Promise<void>;
+  onDeleteTag?: (name: string) => Promise<void>;
+  onFetch?: () => Promise<void>;
+  onPull?: () => Promise<void>;
+  onPush?: () => Promise<void>;
+  onPullRebase?: () => Promise<void>;
+}
 
+const BranchesView: Component<BranchesViewProps> = (props) => {
+  const [newBranchName, setNewBranchName] = createSignal("");
+  const [renamingBranch, setRenamingBranch] = createSignal<string | null>(null);
+  const [renameValue, setRenameValue] = createSignal("");
+  const [showTagSection, setShowTagSection] = createSignal(true);
+  const [newTagName, setNewTagName] = createSignal("");
+  const [newTagMessage, setNewTagMessage] = createSignal("");
+  const [syncing, setSyncing] = createSignal(false);
+
+  const branches = () => props.branches ?? [];
+  const tags = () => props.tags ?? [];
   const localBranches = () => branches().filter((b) => !b.is_remote);
   const remoteBranches = () => branches().filter((b) => b.is_remote);
 
-  onMount(async () => {
-    try {
-      // TODO: 从 store 或 service 获取分支列表
-      // const list = await gitService.getBranches();
-      // setBranches(list);
-      setBranches([]);
-    } catch (err) {
-      console.error("[BranchesView] 获取分支失败:", err);
-    }
-  });
+  const wrapSync = async (fn?: () => Promise<void>) => {
+    if (!fn) return;
+    setSyncing(true);
+    try { await fn(); } finally { setSyncing(false); }
+  };
 
   const handleCreateBranch = async () => {
     const name = newBranchName().trim();
     if (!name) return;
     try {
-      // TODO: 调用 git service 创建分支
-      console.log("[BranchesView] create branch:", name);
+      await props.onCreateBranch?.(name);
       setNewBranchName("");
     } catch (err) {
       console.error("[BranchesView] 创建分支失败:", err);
@@ -35,8 +54,7 @@ const BranchesView: Component = () => {
 
   const handleCheckout = async (name: string) => {
     try {
-      // TODO: 调用 git service 切换分支
-      console.log("[BranchesView] checkout:", name);
+      await props.onCheckoutBranch?.(name);
     } catch (err) {
       console.error("[BranchesView] 切换分支失败:", err);
     }
@@ -44,10 +62,58 @@ const BranchesView: Component = () => {
 
   const handleDelete = async (name: string) => {
     try {
-      // TODO: 调用 git service 删除分支（可加确认弹窗）
-      console.log("[BranchesView] delete:", name);
+      await props.onDeleteBranch?.(name);
     } catch (err) {
       console.error("[BranchesView] 删除分支失败:", err);
+    }
+  };
+
+  const handleStartRename = (name: string) => {
+    setRenamingBranch(name);
+    setRenameValue(name);
+  };
+
+  const handleFinishRename = async () => {
+    const oldName = renamingBranch();
+    const newName = renameValue().trim();
+    if (!oldName || !newName || oldName === newName) {
+      setRenamingBranch(null);
+      return;
+    }
+    try {
+      await props.onRenameBranch?.(oldName, newName);
+    } catch (err) {
+      console.error("[BranchesView] 重命名分支失败:", err);
+    }
+    setRenamingBranch(null);
+  };
+
+  const handleMerge = async (name: string) => {
+    try {
+      await props.onMergeBranch?.(name);
+    } catch (err) {
+      console.error("[BranchesView] 合并分支失败:", err);
+    }
+  };
+
+  const handleRebase = async (name: string) => {
+    try {
+      await props.onRebaseOnto?.(name);
+    } catch (err) {
+      console.error("[BranchesView] 变基失败:", err);
+    }
+  };
+
+  const handleCreateTag = async () => {
+    const name = newTagName().trim();
+    if (!name) return;
+    try {
+      const msg = newTagMessage().trim() || undefined;
+      await props.onCreateTag?.(name, msg);
+      setNewTagName("");
+      setNewTagMessage("");
+    } catch (err) {
+      console.error("[BranchesView] 创建标签失败:", err);
     }
   };
 
@@ -70,6 +136,65 @@ const BranchesView: Component = () => {
       {/* 顶部标题栏 */}
       <div class={styles.header}>
         <span class={styles.title}>分支管理</span>
+        {/* 远程同步操作 */}
+        <div style={{ display: "flex", gap: "4px", "margin-left": "auto" }}>
+          <button
+            style={{
+              display: "inline-flex", "align-items": "center", gap: "4px",
+              padding: "4px 10px", background: "none", border: "1px solid var(--gs-border-primary)",
+              "border-radius": "4px", cursor: "pointer", color: "var(--gs-text-secondary)",
+              "font-size": "12px",
+            }}
+            onClick={() => wrapSync(props.onFetch)}
+            disabled={syncing()}
+            title="Fetch - 获取远程更新"
+          >
+            <span>{"\u21BB"}</span>
+            Fetch
+          </button>
+          <button
+            style={{
+              display: "inline-flex", "align-items": "center", gap: "4px",
+              padding: "4px 10px", background: "none", border: "1px solid var(--gs-border-primary)",
+              "border-radius": "4px", cursor: "pointer", color: "var(--gs-text-secondary)",
+              "font-size": "12px",
+            }}
+            onClick={() => wrapSync(props.onPull)}
+            disabled={syncing()}
+            title="Pull - 拉取远程变更"
+          >
+            <span>{"\u2193"}</span>
+            Pull
+          </button>
+          <button
+            style={{
+              display: "inline-flex", "align-items": "center", gap: "4px",
+              padding: "4px 10px", background: "none", border: "1px solid var(--gs-border-primary)",
+              "border-radius": "4px", cursor: "pointer", color: "var(--gs-text-secondary)",
+              "font-size": "12px",
+            }}
+            onClick={() => wrapSync(props.onPush)}
+            disabled={syncing()}
+            title="Push - 推送本地变更"
+          >
+            <span>{"\u2191"}</span>
+            Push
+          </button>
+          <button
+            style={{
+              display: "inline-flex", "align-items": "center", gap: "4px",
+              padding: "4px 10px", background: "none", border: "1px solid var(--gs-border-primary)",
+              "border-radius": "4px", cursor: "pointer", color: "var(--gs-text-secondary)",
+              "font-size": "12px",
+            }}
+            onClick={() => wrapSync(props.onPullRebase)}
+            disabled={syncing()}
+            title="Pull (Rebase) - 变基拉取"
+          >
+            <span>{"\u21BB"}</span>
+            Pull Rebase
+          </button>
+        </div>
       </div>
 
       {/* 新建分支 */}
@@ -119,7 +244,32 @@ const BranchesView: Component = () => {
                     class={`${styles.branchItem} ${branch.is_head ? styles.current : ""}`}
                   >
                     <span class={styles.branchIcon}>{"\u2442"}</span>
-                    <span class={styles.branchName}>{branch.name}</span>
+                    <Show
+                      when={renamingBranch() !== branch.name}
+                      fallback={
+                        <input
+                          style={{
+                            flex: "1",
+                            height: "24px",
+                            padding: "0 6px",
+                            "font-size": "13px",
+                            border: "1px solid var(--gs-border-focus)",
+                            "border-radius": "3px",
+                            outline: "none",
+                          }}
+                          value={renameValue()}
+                          onInput={(e) => setRenameValue(e.currentTarget.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleFinishRename();
+                            if (e.key === "Escape") setRenamingBranch(null);
+                          }}
+                          onBlur={handleFinishRename}
+                          autofocus
+                        />
+                      }
+                    >
+                      <span class={styles.branchName}>{branch.name}</span>
+                    </Show>
                     <Show when={branch.is_head}>
                       <span class={styles.currentBadge}>当前</span>
                     </Show>
@@ -131,7 +281,28 @@ const BranchesView: Component = () => {
                           onClick={() => handleCheckout(branch.name)}
                           title="切换到此分支"
                         >
-                          {"\u21B5"}
+                          {"\u21B5"} 切换
+                        </button>
+                        <button
+                          class={styles.branchActionBtn}
+                          onClick={() => handleMerge(branch.name)}
+                          title="合并到当前分支"
+                        >
+                          {"\u2934"} 合并
+                        </button>
+                        <button
+                          class={styles.branchActionBtn}
+                          onClick={() => handleRebase(branch.name)}
+                          title="变基到此分支"
+                        >
+                          {"\u21A0"} 变基
+                        </button>
+                        <button
+                          class={styles.branchActionBtn}
+                          onClick={() => handleStartRename(branch.name)}
+                          title="重命名"
+                        >
+                          {"\u270E"}
                         </button>
                         <button
                           class={`${styles.branchActionBtn} ${styles.danger}`}
@@ -176,13 +347,78 @@ const BranchesView: Component = () => {
                         onClick={() => handleCheckout(branch.name)}
                         title="检出远程分支"
                       >
-                        {"\u21B5"}
+                        {"\u21B5"} 检出
                       </button>
                     </div>
                   </div>
                 )}
               </For>
             </div>
+          </Show>
+        </div>
+
+        {/* 标签 */}
+        <div class={styles.group}>
+          <div class={styles.groupHeader}>
+            <button
+              style={{ display: "flex", "align-items": "center", gap: "6px", background: "none", border: "none", cursor: "pointer", color: "inherit", "font-size": "inherit", "font-weight": "inherit" }}
+              onClick={() => setShowTagSection(!showTagSection())}
+            >
+              <span style={{ "font-size": "10px" }}>{showTagSection() ? "\u25BC" : "\u25B6"}</span>
+              标签
+            </button>
+            <span class={styles.groupCount}>{tags().length}</span>
+          </div>
+          <Show when={showTagSection()}>
+            {/* 新建标签 */}
+            <div style={{ display: "flex", gap: "6px", padding: "8px 16px" }}>
+              <input
+                style={{
+                  flex: "1",
+                  height: "28px",
+                  padding: "0 8px",
+                  "font-size": "12px",
+                  border: "1px solid var(--gs-border-primary)",
+                  "border-radius": "3px",
+                  "background-color": "var(--gs-bg-primary)",
+                  color: "var(--gs-text-primary)",
+                  outline: "none",
+                }}
+                placeholder="标签名称"
+                value={newTagName()}
+                onInput={(e) => setNewTagName(e.currentTarget.value)}
+              />
+              <Button variant="ghost" size="sm" onClick={handleCreateTag} disabled={!newTagName().trim()}>
+                创建
+              </Button>
+            </div>
+            <Show
+              when={tags().length > 0}
+              fallback={<div class={styles.emptyState}><span class={styles.emptyText}>暂无标签</span></div>}
+            >
+              <div class={styles.branchList}>
+                <For each={tags()}>
+                  {(tag) => (
+                    <div class={styles.branchItem}>
+                      <span class={styles.branchIcon}>{"\u{1F3F7}"}</span>
+                      <span class={styles.branchName}>{tag.name}</span>
+                      <Show when={!tag.is_lightweight}>
+                        <span style={{ "font-size": "10px", color: "var(--gs-text-muted)" }}>
+                          {tag.message?.slice(0, 30)}
+                        </span>
+                      </Show>
+                      <div class={styles.branchActions}>
+                        <button
+                          class={`${styles.branchActionBtn} ${styles.danger}`}
+                          onClick={() => props.onDeleteTag?.(tag.name)}
+                          title="删除标签"
+                        >{"\u2715"}</button>
+                      </div>
+                    </div>
+                  )}
+                </For>
+              </div>
+            </Show>
           </Show>
         </div>
       </div>
