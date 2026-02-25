@@ -1,7 +1,11 @@
-import { type Component, createSignal, createEffect, Show, For, onMount } from "solid-js";
+import { type Component, createSignal, createEffect, Show, For, onMount, onCleanup } from "solid-js";
 import History from "lucide-solid/icons/history";
-import { Button } from "@/components/ui";
-import type { CommitInfo, DiffOutput } from "@/types";
+import Search from "lucide-solid/icons/search";
+import FilterIcon from "lucide-solid/icons/filter";
+import X from "lucide-solid/icons/x";
+import { CommitGraph } from "@/components/graph";
+import { useI18n } from "@/i18n";
+import type { CommitInfo, DiffOutput, BranchInfo } from "@/types";
 import * as gitService from "@/services/git";
 import styles from "./HistoryView.module.css";
 
@@ -22,10 +26,10 @@ function formatTime(timestamp: number): string {
       day: "2-digit",
     });
   }
-  if (days > 0) return `${days} 天前`;
-  if (hours > 0) return `${hours} 小时前`;
-  if (minutes > 0) return `${minutes} 分钟前`;
-  return "刚刚";
+  if (days > 0) return `${days} days ago`;
+  if (hours > 0) return `${hours} hours ago`;
+  if (minutes > 0) return `${minutes} min ago`;
+  return "just now";
 }
 
 function shortHash(id: string): string {
@@ -39,30 +43,122 @@ export interface HistoryViewProps {
 }
 
 const HistoryView: Component<HistoryViewProps> = (props) => {
+  const { t } = useI18n();
   const [commits, setCommits] = createSignal<CommitInfo[]>([]);
   const [loading, setLoading] = createSignal(true);
   const [searchQuery, setSearchQuery] = createSignal("");
+  const [showSearch, setShowSearch] = createSignal(false);
   const [selectedCommit, setSelectedCommit] = createSignal<CommitInfo | null>(null);
   const [commitDiff, setCommitDiff] = createSignal<DiffOutput | null>(null);
   const [showResetDialog, setShowResetDialog] = createSignal(false);
   const [resetTargetId, setResetTargetId] = createSignal("");
   const [resetMode, setResetMode] = createSignal("mixed");
   const [contextMenu, setContextMenu] = createSignal<{ x: number; y: number; commit: CommitInfo } | null>(null);
+  const [branches, setBranches] = createSignal<BranchInfo[]>([]);
+  const [selectedBranches, setSelectedBranches] = createSignal<Set<string>>(new Set());
+  const [branchTips, setBranchTips] = createSignal<Record<string, string[]>>({});
+  const [branchDropdownOpen, setBranchDropdownOpen] = createSignal(false);
+
+  let dropdownRef: HTMLDivElement | undefined;
+
+  const handleClickOutside = (e: MouseEvent) => {
+    if (dropdownRef && !dropdownRef.contains(e.target as Node)) {
+      setBranchDropdownOpen(false);
+    }
+  };
+
+  onMount(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+  });
+
+  onCleanup(() => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  });
+
+  const toggleBranch = (name: string) => {
+    setSelectedBranches((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) {
+        next.delete(name);
+      } else {
+        next.add(name);
+      }
+      return next;
+    });
+    loadCommits();
+  };
+
+  const clearBranchSelection = () => {
+    setSelectedBranches(new Set<string>());
+    loadCommits();
+  };
+
+  const filteredBranchTips = () => {
+    const sel = selectedBranches();
+    const tips = branchTips();
+    if (sel.size === 0) return tips;
+    const result: Record<string, string[]> = {};
+    for (const [commitId, names] of Object.entries(tips)) {
+      const filtered = names.filter((n) => sel.has(n));
+      if (filtered.length > 0) {
+        result[commitId] = filtered;
+      }
+    }
+    return result;
+  };
+
+  const branchSelectLabel = () => {
+    const sel = selectedBranches();
+    if (sel.size === 0) return t("history.filter");
+    if (sel.size === 1) return Array.from(sel)[0];
+    return `${sel.size} branches`;
+  };
 
   const loadCommits = async () => {
     setLoading(true);
     try {
-      const log = await gitService.getCommitLog(200);
-      setCommits(log);
+      const sel = selectedBranches();
+      if (sel.size > 0) {
+        const allLogs = await Promise.all(
+          Array.from(sel).map((b) => gitService.getBranchLog(b, 200, true))
+        );
+        const seen = new Set<string>();
+        const merged: CommitInfo[] = [];
+        for (const log of allLogs) {
+          for (const commit of log) {
+            if (!seen.has(commit.id)) {
+              seen.add(commit.id);
+              merged.push(commit);
+            }
+          }
+        }
+        merged.sort((a, b) => b.timestamp - a.timestamp);
+        const commitIdSet = new Set(merged.map((c) => c.id));
+        for (const commit of merged) {
+          commit.parent_ids = commit.parent_ids.filter((pid) => commitIdSet.has(pid));
+        }
+        setCommits(merged);
+      } else {
+        const log = await gitService.getCommitLog(200);
+        setCommits(log);
+      }
     } catch (err) {
-      console.error("[HistoryView] 加载提交历史失败:", err);
+      console.error("[HistoryView] Failed to load commits:", err);
       setCommits([]);
     } finally {
       setLoading(false);
     }
   };
 
-  onMount(loadCommits);
+  onMount(async () => {
+    const [, branchList, tips] = await Promise.all([
+      loadCommits(),
+      gitService.getBranches().catch(() => [] as BranchInfo[]),
+      gitService.getBranchTips().catch(() => ({} as Record<string, string[]>)),
+    ]);
+    setBranches(branchList);
+    setBranchTips(tips);
+  });
 
   const handleSearch = async () => {
     const query = searchQuery().trim();
@@ -75,7 +171,7 @@ const HistoryView: Component<HistoryViewProps> = (props) => {
       const results = await gitService.searchCommits(query, 200);
       setCommits(results);
     } catch (err) {
-      console.error("[HistoryView] 搜索失败:", err);
+      console.error("[HistoryView] Search failed:", err);
     } finally {
       setLoading(false);
     }
@@ -87,7 +183,7 @@ const HistoryView: Component<HistoryViewProps> = (props) => {
       const diff = await gitService.getCommitDiff(commit.id);
       setCommitDiff(diff);
     } catch (err) {
-      console.error("[HistoryView] 加载提交 diff 失败:", err);
+      console.error("[HistoryView] Failed to load commit diff:", err);
       setCommitDiff(null);
     }
   };
@@ -113,152 +209,208 @@ const HistoryView: Component<HistoryViewProps> = (props) => {
 
   return (
     <div class={styles.history} onClick={closeContextMenu}>
-      {/* 顶部标题栏 */}
-      <div class={styles.header}>
-        <span class={styles.title}>提交历史</span>
-        <Show when={!loading()}>
-          <span class={styles.commitCount}>{commits().length} 条提交</span>
-        </Show>
+      {/* Top Bar */}
+      <div class={styles.topBar}>
+        <div class={styles.topBarLeft}>
+          <span class={styles.topBarTitle}>{t("history.title")}</span>
+          <Show when={!loading()}>
+            <span class={styles.topBarBadge}>{commits().length} {t("history.commits")}</span>
+          </Show>
+        </div>
+        <div class={styles.topBarRight}>
+          <button class={styles.topBarBtn} onClick={() => setShowSearch(!showSearch())}>
+            <Search size={14} />
+            <span>{t("history.searchPlaceholder")}</span>
+          </button>
+          <div ref={dropdownRef} style={{ position: "relative" }}>
+            <button class={styles.topBarBtn} onClick={() => setBranchDropdownOpen(!branchDropdownOpen())}>
+              <FilterIcon size={14} />
+              <span>{branchSelectLabel()}</span>
+              <Show when={selectedBranches().size > 0}>
+                <span
+                  class={styles.clearFilterBtn}
+                  onClick={(e) => { e.stopPropagation(); clearBranchSelection(); }}
+                >
+                  <X size={12} />
+                </span>
+              </Show>
+            </button>
+            <Show when={branchDropdownOpen()}>
+              <div class={styles.filterDropdown}>
+                <Show when={branches().filter(b => !b.is_remote).length > 0}>
+                  <div class={styles.filterGroupLabel}>LOCAL</div>
+                  <For each={branches().filter(b => !b.is_remote)}>
+                    {(b) => (
+                      <label class={styles.filterItem}>
+                        <input
+                          type="checkbox"
+                          checked={selectedBranches().has(b.name)}
+                          onChange={() => toggleBranch(b.name)}
+                        />
+                        <span class={styles.filterItemText}>{b.name}</span>
+                      </label>
+                    )}
+                  </For>
+                </Show>
+                <Show when={branches().filter(b => b.is_remote).length > 0}>
+                  <Show when={branches().filter(b => !b.is_remote).length > 0}>
+                    <div class={styles.filterDivider} />
+                  </Show>
+                  <div class={styles.filterGroupLabel}>REMOTE</div>
+                  <For each={branches().filter(b => b.is_remote)}>
+                    {(b) => (
+                      <label class={styles.filterItem}>
+                        <input
+                          type="checkbox"
+                          checked={selectedBranches().has(b.name)}
+                          onChange={() => toggleBranch(b.name)}
+                        />
+                        <span class={styles.filterItemText}>{b.name}</span>
+                      </label>
+                    )}
+                  </For>
+                </Show>
+              </div>
+            </Show>
+          </div>
+        </div>
       </div>
 
-      {/* 搜索栏 */}
-      <div style={{
-        display: "flex",
-        gap: "8px",
-        padding: "8px 16px",
-        "border-bottom": "1px solid var(--gs-border-secondary)",
-      }}>
-        <input
-          style={{
-            flex: "1",
-            height: "30px",
-            padding: "0 10px",
-            "background-color": "var(--gs-bg-primary)",
-            border: "1px solid var(--gs-border-primary)",
-            "border-radius": "4px",
-            color: "var(--gs-text-primary)",
-            "font-size": "13px",
-            outline: "none",
-          }}
-          placeholder="搜索提交信息..."
-          value={searchQuery()}
-          onInput={(e) => setSearchQuery(e.currentTarget.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") handleSearch();
-          }}
-        />
-        <Button variant="ghost" size="sm" onClick={handleSearch}>搜索</Button>
-      </div>
+      {/* Search Bar (expandable) */}
+      <Show when={showSearch()}>
+        <div class={styles.searchBar}>
+          <input
+            class={styles.searchInput}
+            placeholder={t("history.searchPlaceholder")}
+            value={searchQuery()}
+            onInput={(e) => setSearchQuery(e.currentTarget.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSearch();
+              if (e.key === "Escape") setShowSearch(false);
+            }}
+            autofocus
+          />
+          <button
+            class={styles.searchCloseBtn}
+            onClick={() => {
+              setShowSearch(false);
+              if (searchQuery()) {
+                setSearchQuery("");
+                loadCommits();
+              }
+            }}
+          >
+            <X size={14} />
+          </button>
+        </div>
+      </Show>
 
-      {/* 内容区 */}
-      <Show when={!loading()} fallback={<div class={styles.loading}>加载中...</div>}>
+      {/* Content */}
+      <Show when={!loading()} fallback={<div class={styles.loading}>{t("history.loading")}</div>}>
         <Show
           when={commits().length > 0}
           fallback={
             <div class={styles.emptyState}>
               <span class={styles.emptyIcon}><History size={36} /></span>
-              <span class={styles.emptyText}>暂无提交记录</span>
+              <span class={styles.emptyText}>{t("history.noCommits")}</span>
             </div>
           }
         >
-          <div style={{ display: "flex", flex: "1", overflow: "hidden" }}>
-            {/* 提交列表 */}
-            <div class={styles.commitList} style={{ flex: selectedCommit() ? "0 0 50%" : "1" }}>
-              <For each={commits()}>
-                {(commit) => (
-                  <div
-                    class={styles.commitItem}
-                    style={{
-                      "background-color": selectedCommit()?.id === commit.id ? "var(--gs-accent-subtle)" : undefined,
-                    }}
-                    onClick={() => handleSelectCommit(commit)}
-                    onContextMenu={(e) => handleContextMenu(e, commit)}
-                  >
-                    <div class={styles.commitTopRow}>
-                      <span class={styles.commitHash}>{shortHash(commit.id)}</span>
-                      <span class={styles.commitSummary}>{commit.summary}</span>
-                    </div>
-                    <div class={styles.commitBottomRow}>
-                      <span class={styles.commitAuthor}>{commit.author_name}</span>
-                      <span class={styles.commitTime}>{formatTime(commit.timestamp)}</span>
-                    </div>
-                  </div>
-                )}
-              </For>
+          <div class={styles.content}>
+            <div
+              class={styles.commitList}
+              style={{ flex: selectedCommit() ? "0 0 50%" : "1" }}
+              onContextMenu={(e) => {
+                const target = e.target as HTMLElement;
+                const row = target.closest("[data-commit-id]");
+                if (row) {
+                  const commitId = row.getAttribute("data-commit-id");
+                  const commit = commits().find((c) => c.id === commitId);
+                  if (commit) handleContextMenu(e, commit);
+                }
+              }}
+            >
+              <CommitGraph
+                commits={commits()}
+                selectedCommitId={selectedCommit()?.id}
+                onSelectCommit={handleSelectCommit}
+                branchTips={filteredBranchTips()}
+              />
             </div>
 
-            {/* 提交详情侧面板 */}
+            {/* Detail Panel */}
             <Show when={selectedCommit()}>
               {(commit) => (
-                <div style={{
-                  flex: "0 0 50%",
-                  "border-left": "1px solid var(--gs-border-secondary)",
-                  overflow: "auto",
-                  padding: "12px 16px",
-                }}>
-                  <div style={{ display: "flex", "justify-content": "space-between", "margin-bottom": "12px" }}>
-                    <span style={{ "font-weight": "600", "font-size": "14px" }}>提交详情</span>
+                <div class={styles.detailPanel}>
+                  <div class={styles.detailHeader}>
+                    <span class={styles.detailTitle}>{t("history.commitDetails")}</span>
                     <button
-                      style={{ background: "none", border: "none", cursor: "pointer", color: "var(--gs-text-muted)" }}
+                      class={styles.detailCloseBtn}
                       onClick={() => { setSelectedCommit(null); setCommitDiff(null); }}
-                    >{"\u2715"}</button>
+                    >
+                      <X size={14} />
+                    </button>
                   </div>
-                  <div style={{ "font-size": "12px", "margin-bottom": "8px" }}>
-                    <div><strong>Hash:</strong> <code>{commit().id}</code></div>
-                    <div><strong>作者:</strong> {commit().author_name} &lt;{commit().author_email}&gt;</div>
-                    <div><strong>日期:</strong> {new Date(commit().timestamp * 1000).toLocaleString("zh-CN")}</div>
-                  </div>
-                  <pre style={{
-                    "font-size": "13px",
-                    "white-space": "pre-wrap",
-                    "margin-bottom": "12px",
-                    padding: "8px",
-                    "background-color": "var(--gs-bg-secondary)",
-                    "border-radius": "4px",
-                  }}>
-                    {commit().message}
-                  </pre>
-                  <Show when={commitDiff()}>
-                    {(diff) => (
-                      <div>
-                        <div style={{ "font-size": "12px", color: "var(--gs-text-muted)", "margin-bottom": "8px" }}>
-                          {diff().stats.files_changed} 个文件更改, +{diff().stats.insertions} -{diff().stats.deletions}
-                        </div>
-                        <For each={diff().files}>
-                          {(file) => (
-                            <div style={{ "margin-bottom": "8px" }}>
-                              <div style={{ "font-size": "12px", "font-weight": "500", "margin-bottom": "4px" }}>
-                                {file.new_path ?? file.old_path}
-                              </div>
-                              <For each={file.hunks}>
-                                {(hunk) => (
-                                  <div style={{ "font-family": "monospace", "font-size": "11px" }}>
-                                    <div style={{ color: "var(--gs-text-muted)", "background-color": "var(--gs-bg-tertiary)", padding: "2px 8px" }}>
-                                      {hunk.header}
-                                    </div>
-                                    <For each={hunk.lines}>
-                                      {(line) => (
-                                        <div style={{
-                                          padding: "0 8px",
-                                          "white-space": "pre-wrap",
-                                          "background-color":
-                                            line.origin === "Addition" ? "var(--gs-diff-added-bg, #e6ffec)" :
-                                            line.origin === "Deletion" ? "var(--gs-diff-deleted-bg, #ffebe9)" :
-                                            "transparent",
-                                        }}>
-                                          {line.origin === "Addition" ? "+" : line.origin === "Deletion" ? "-" : " "}{line.content}
-                                        </div>
-                                      )}
-                                    </For>
-                                  </div>
-                                )}
-                              </For>
-                            </div>
-                          )}
-                        </For>
+                  <div class={styles.detailBody}>
+                    <div class={styles.detailMeta}>
+                      <div class={styles.detailMetaRow}>
+                        <span class={styles.detailMetaLabel}>{t("history.hash")}</span>
+                        <code class={styles.detailMetaValue}>{commit().id}</code>
                       </div>
-                    )}
-                  </Show>
+                      <div class={styles.detailMetaRow}>
+                        <span class={styles.detailMetaLabel}>{t("history.author")}</span>
+                        <span class={styles.detailMetaValue}>
+                          {commit().author_name} &lt;{commit().author_email}&gt;
+                        </span>
+                      </div>
+                      <div class={styles.detailMetaRow}>
+                        <span class={styles.detailMetaLabel}>{t("history.date")}</span>
+                        <span class={styles.detailMetaValue}>
+                          {new Date(commit().timestamp * 1000).toLocaleString("zh-CN")}
+                        </span>
+                      </div>
+                    </div>
+                    <pre class={styles.detailMessage}>{commit().message}</pre>
+                    <Show when={commitDiff()}>
+                      {(diff) => (
+                        <div>
+                          <div class={styles.detailDiffStats}>
+                            {diff().stats.files_changed} files changed,
+                            +{diff().stats.insertions} -{diff().stats.deletions}
+                          </div>
+                          <For each={diff().files}>
+                            {(file) => (
+                              <div class={styles.detailFile}>
+                                <div class={styles.detailFileName}>
+                                  {file.new_path ?? file.old_path}
+                                </div>
+                                <For each={file.hunks}>
+                                  {(hunk) => (
+                                    <div class={styles.detailHunk}>
+                                      <div class={styles.detailHunkHeader}>{hunk.header}</div>
+                                      <For each={hunk.lines}>
+                                        {(line) => (
+                                          <div class={`${styles.detailDiffLine} ${
+                                            line.origin === "Addition" ? styles.detailDiffLineAdd :
+                                            line.origin === "Deletion" ? styles.detailDiffLineDel : ""
+                                          }`}>
+                                            <span class={styles.detailDiffLinePrefix}>
+                                              {line.origin === "Addition" ? "+" : line.origin === "Deletion" ? "-" : " "}
+                                            </span>
+                                            <span>{line.content}</span>
+                                          </div>
+                                        )}
+                                      </For>
+                                    </div>
+                                  )}
+                                </For>
+                              </div>
+                            )}
+                          </For>
+                        </div>
+                      )}
+                    </Show>
+                  </div>
                 </div>
               )}
             </Show>
@@ -266,80 +418,76 @@ const HistoryView: Component<HistoryViewProps> = (props) => {
         </Show>
       </Show>
 
-      {/* 右键菜单 */}
+      {/* Context Menu */}
       <Show when={contextMenu()}>
         {(menu) => (
           <div
-            style={{
-              position: "fixed",
-              left: `${menu().x}px`,
-              top: `${menu().y}px`,
-              "background-color": "var(--gs-bg-primary, #fff)",
-              border: "1px solid var(--gs-border-primary)",
-              "border-radius": "6px",
-              "box-shadow": "0 4px 12px rgba(0,0,0,0.15)",
-              "z-index": "1000",
-              "min-width": "160px",
-              padding: "4px 0",
-            }}
+            class={styles.contextMenu}
+            style={{ left: `${menu().x}px`, top: `${menu().y}px` }}
             onClick={(e) => e.stopPropagation()}
           >
             <button
-              style={{ display: "block", width: "100%", padding: "6px 16px", background: "none", border: "none", cursor: "pointer", "font-size": "13px", "text-align": "left", color: "var(--gs-text-primary)" }}
+              class={styles.contextMenuItem}
               onClick={() => { props.onCherryPick?.(menu().commit.id); closeContextMenu(); }}
-            >Cherry-pick</button>
+            >
+              {t("history.cherryPick")}
+            </button>
             <button
-              style={{ display: "block", width: "100%", padding: "6px 16px", background: "none", border: "none", cursor: "pointer", "font-size": "13px", "text-align": "left", color: "var(--gs-text-primary)" }}
+              class={styles.contextMenuItem}
               onClick={() => { props.onRevert?.(menu().commit.id); closeContextMenu(); }}
-            >Revert</button>
-            <div style={{ height: "1px", "background-color": "var(--gs-border-secondary)", margin: "4px 0" }} />
+            >
+              {t("history.revert")}
+            </button>
+            <div class={styles.contextMenuDivider} />
             <button
-              style={{ display: "block", width: "100%", padding: "6px 16px", background: "none", border: "none", cursor: "pointer", "font-size": "13px", "text-align": "left", color: "var(--gs-error-text, #dc3545)" }}
+              class={`${styles.contextMenuItem} ${styles.contextMenuItemDanger}`}
               onClick={() => handleResetOpen(menu().commit.id)}
-            >重置到此提交...</button>
+            >
+              {t("history.resetToCommit")}
+            </button>
           </div>
         )}
       </Show>
 
-      {/* Reset 对话框 */}
+      {/* Reset Dialog */}
       <Show when={showResetDialog()}>
-        <div style={{
-          position: "fixed",
-          inset: "0",
-          display: "flex",
-          "align-items": "center",
-          "justify-content": "center",
-          "background-color": "rgba(0,0,0,0.5)",
-          "z-index": "1000",
-        }}>
-          <div style={{
-            padding: "20px",
-            "background-color": "var(--gs-bg-primary, #fff)",
-            "border-radius": "8px",
-            "box-shadow": "0 4px 12px rgba(0,0,0,0.2)",
-            "min-width": "320px",
-          }}>
-            <h3 style={{ margin: "0 0 12px", "font-size": "14px" }}>重置到提交</h3>
-            <p style={{ margin: "0 0 8px", "font-size": "12px", color: "var(--gs-text-muted)" }}>
-              目标: {shortHash(resetTargetId())}
-            </p>
-            <div style={{ display: "flex", "flex-direction": "column", gap: "8px", "margin-bottom": "16px" }}>
-              <label style={{ display: "flex", "align-items": "center", gap: "8px", "font-size": "13px", cursor: "pointer" }}>
-                <input type="radio" name="resetMode" value="soft" checked={resetMode() === "soft"} onChange={() => setResetMode("soft")} />
-                Soft - 保留暂存区和工作区
+        <div class={styles.dialogOverlay}>
+          <div class={styles.dialogBox}>
+            <h3 class={styles.dialogTitle}>{t("history.resetTitle")}</h3>
+            <p class={styles.dialogSubtitle}>{t("history.resetTarget")}: {shortHash(resetTargetId())}</p>
+            <div class={styles.dialogOptions}>
+              <label class={styles.dialogOption}>
+                <input
+                  type="radio" name="resetMode" value="soft"
+                  checked={resetMode() === "soft"}
+                  onChange={() => setResetMode("soft")}
+                />
+                {t("history.resetSoft")}
               </label>
-              <label style={{ display: "flex", "align-items": "center", gap: "8px", "font-size": "13px", cursor: "pointer" }}>
-                <input type="radio" name="resetMode" value="mixed" checked={resetMode() === "mixed"} onChange={() => setResetMode("mixed")} />
-                Mixed - 保留工作区，清空暂存区
+              <label class={styles.dialogOption}>
+                <input
+                  type="radio" name="resetMode" value="mixed"
+                  checked={resetMode() === "mixed"}
+                  onChange={() => setResetMode("mixed")}
+                />
+                {t("history.resetMixed")}
               </label>
-              <label style={{ display: "flex", "align-items": "center", gap: "8px", "font-size": "13px", cursor: "pointer" }}>
-                <input type="radio" name="resetMode" value="hard" checked={resetMode() === "hard"} onChange={() => setResetMode("hard")} />
-                Hard - 丢弃所有变更（不可恢复）
+              <label class={styles.dialogOption}>
+                <input
+                  type="radio" name="resetMode" value="hard"
+                  checked={resetMode() === "hard"}
+                  onChange={() => setResetMode("hard")}
+                />
+                {t("history.resetHard")}
               </label>
             </div>
-            <div style={{ display: "flex", gap: "8px", "justify-content": "flex-end" }}>
-              <Button variant="ghost" size="sm" onClick={() => setShowResetDialog(false)}>取消</Button>
-              <Button variant="danger" size="sm" onClick={handleResetConfirm}>重置</Button>
+            <div class={styles.dialogActions}>
+              <button class={styles.dialogBtnCancel} onClick={() => setShowResetDialog(false)}>
+                {t("common.cancel")}
+              </button>
+              <button class={styles.dialogBtnDanger} onClick={handleResetConfirm}>
+                {t("history.reset")}
+              </button>
             </div>
           </div>
         </div>

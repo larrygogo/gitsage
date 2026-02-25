@@ -5,51 +5,140 @@
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+  background-color: var(--gs-bg-primary);
 }
 
-.content {
+/* ── TopBar (48px) ── */
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  min-height: 48px;
+  padding: 0 16px;
+  background-color: var(--gs-bg-secondary);
+  border-bottom: 1px solid var(--gs-border-primary);
+}
+
+.topBarLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topBarTitle {
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gs-text-primary);
+}
+
+.topBarBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background-color: var(--gs-accent-primary);
+  color: #ffffff;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.topBarRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topBarBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  background: none;
+  border: 1px solid var(--gs-border-primary);
+  border-radius: 6px;
+  color: var(--gs-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.topBarBtn:hover {
+  background-color: var(--gs-accent-subtle);
+  color: var(--gs-text-primary);
+  border-color: var(--gs-text-muted);
+}
+
+.topBarBtnPrimary {
+  background-color: var(--gs-accent-primary);
+  border-color: var(--gs-accent-primary);
+  color: #0A0A0A;
+}
+
+.topBarBtnPrimary:hover {
+  background-color: var(--gs-accent-hover);
+  border-color: var(--gs-accent-hover);
+  color: #0A0A0A;
+}
+
+/* ── Operation banner ── */
+
+.operationBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: var(--gs-warning-bg);
+  border-bottom: 1px solid var(--gs-warning-border);
+  font-size: 13px;
+  color: var(--gs-warning-text);
+}
+
+.operationLabel {
+  font-weight: 600;
+}
+
+.operationMessage {
+  flex: 1;
+}
+
+/* ── Body ── */
+
+.body {
   flex: 1;
   overflow: hidden;
 }
 
-/* ── File list panel ── */
+/* ── File panel (320px) ── */
 
 .filePanel {
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+  background-color: var(--gs-bg-secondary);
 }
+
+/* ── File group (staged / unstaged) ── */
 
 .fileGroup {
   display: flex;
   flex-direction: column;
-  min-height: 0;
+  flex: none;
   overflow: hidden;
 }
 
-/* ── Divider between staged / unstaged ── */
-
-.filePanelDivider {
-  flex: none;
-  height: 3px;
-  background-color: var(--gs-border-secondary);
-  cursor: row-resize;
-  transition: background-color 0.15s ease;
-}
-
-.filePanelDivider:hover,
-.filePanelDivider.dividerActive {
-  background-color: var(--gs-accent-primary);
-}
-
-.filePanelDivider.dividerDisabled {
-  cursor: default;
-  height: 1px;
-}
-
-.filePanelDivider.dividerDisabled:hover {
-  background-color: var(--gs-border-secondary);
+.fileGroupOpen {
+  flex: 1;
+  min-height: 0;
 }
 
 /* ── Group header ── */
@@ -59,44 +148,28 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 12px;
-  background-color: var(--gs-bg-secondary);
-  border-bottom: 1px solid var(--gs-border-secondary);
+  padding: 8px 12px;
   user-select: none;
   cursor: pointer;
 }
 
-.groupHeader:hover {
-  background-color: var(--gs-bg-tertiary, var(--gs-bg-secondary));
-}
-
-/* ── Collapse icon ── */
-
-.collapseIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 14px;
-  height: 14px;
-  font-size: 8px;
-  color: var(--gs-text-muted);
-  transition: transform 0.15s ease;
-  transform: rotate(90deg);
-}
-
-.collapseIcon.collapsed {
-  transform: rotate(0deg);
-}
-
-.groupTitle {
+.groupHeaderLeft {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: inherit;
+  padding: 0;
+}
+
+.groupTitle {
+  font-size: 11px;
   font-weight: 600;
-  color: var(--gs-text-secondary);
+  color: var(--gs-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.05em;
 }
 
 .groupCount {
@@ -106,48 +179,66 @@
   min-width: 18px;
   height: 18px;
   padding: 0 5px;
-  background-color: var(--gs-accent-subtle);
-  color: var(--gs-accent-primary);
+  background-color: var(--gs-accent-primary);
+  color: #ffffff;
   border-radius: 9px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
-.groupAction {
+.groupActions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.groupActionBtn {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
   background: none;
   border: none;
   border-radius: 4px;
   color: var(--gs-text-muted);
-  font-size: 11px;
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.groupAction:hover {
+.groupActionBtn:hover {
   background-color: var(--gs-accent-subtle);
   color: var(--gs-accent-primary);
 }
 
+/* ── Group divider ── */
+
+.groupDivider {
+  height: 1px;
+  background-color: var(--gs-border-primary);
+  flex: none;
+}
+
+/* ── File list ── */
+
 .fileList {
   flex: 1;
   overflow-y: auto;
-  padding: 4px 0;
+  padding: 2px 0;
 }
+
+/* ── File item ── */
 
 .fileItem {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
-  padding: 4px 12px;
+  padding: 5px 12px;
   background: none;
   border: none;
   text-align: left;
-  font-size: 13px;
   color: var(--gs-text-primary);
   cursor: pointer;
   transition: background-color 0.1s ease;
@@ -158,53 +249,131 @@
 }
 
 .fileItem.selected {
-  background-color: var(--gs-accent-subtle);
-  color: var(--gs-accent-primary);
+  background-color: #FF840008;
 }
 
-.fileStatusBadge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 3px;
-  font-size: 10px;
-  font-weight: 700;
+/* ── File status dot ── */
+
+.fileDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
   flex-shrink: 0;
 }
 
-.fileStatusBadge.new {
-  background-color: var(--gs-diff-added-bg);
-  color: var(--gs-diff-added-text);
+.fileDot.dotModified {
+  background-color: #FF8400;
 }
 
-.fileStatusBadge.modified {
-  background-color: var(--gs-diff-modified-bg);
-  color: var(--gs-diff-modified-text);
+.fileDot.dotNew {
+  background-color: #10B981;
 }
 
-.fileStatusBadge.deleted {
-  background-color: var(--gs-diff-deleted-bg);
-  color: var(--gs-diff-deleted-text);
+.fileDot.dotDeleted {
+  background-color: #EF4444;
 }
 
-.fileStatusBadge.renamed {
-  background-color: var(--gs-warning-bg);
-  color: var(--gs-warning-text);
+.fileDot.dotRenamed {
+  background-color: #F59E0B;
 }
 
-.fileStatusBadge.conflicted {
-  background-color: var(--gs-error-bg);
-  color: var(--gs-error-text);
+.fileDot.dotConflicted {
+  background-color: #EF4444;
 }
+
+/* ── File name ── */
 
 .fileName {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+  font-size: 12px;
+  color: var(--gs-text-secondary);
 }
+
+.fileItem.selected .fileName {
+  color: var(--gs-text-primary);
+}
+
+/* ── File item right area (actions + status label) ── */
+
+.fileItemRight {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* ── File status label (M/A/D) ── */
+
+.fileStatusLabel {
+  flex-shrink: 0;
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+  font-size: 11px;
+  font-weight: 600;
+  width: 14px;
+  text-align: right;
+}
+
+.fileStatusLabel.statusM {
+  color: #FF8400;
+}
+
+.fileStatusLabel.statusA,
+.fileStatusLabel.statusN {
+  color: #10B981;
+}
+
+.fileStatusLabel.statusD {
+  color: #EF4444;
+}
+
+.fileStatusLabel.statusR {
+  color: #F59E0B;
+}
+
+.fileStatusLabel.statusC {
+  color: #EF4444;
+}
+
+/* ── File item hover actions ── */
+
+.fileItemActions {
+  display: none;
+  align-items: center;
+  gap: 2px;
+}
+
+.fileItem:hover .fileItemActions {
+  display: flex;
+}
+
+.fileItem.selected .fileItemActions {
+  display: flex;
+}
+
+.fileItemActionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: none;
+  border: none;
+  border-radius: 3px;
+  color: var(--gs-text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  transition: color 0.1s ease;
+}
+
+.fileItemActionBtn:hover {
+  color: var(--gs-text-primary);
+}
+
+/* ── Empty state ── */
 
 .emptyState {
   display: flex;
@@ -212,7 +381,7 @@
   justify-content: center;
   padding: 24px 16px;
   color: var(--gs-text-muted);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 /* ── Diff panel ── */
@@ -228,12 +397,34 @@
 .diffHeader {
   display: flex;
   align-items: center;
-  padding: 8px 12px;
+  gap: 12px;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 16px;
   background-color: var(--gs-bg-secondary);
-  border-bottom: 1px solid var(--gs-border-secondary);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--gs-text-primary);
+  border-bottom: 1px solid var(--gs-border-primary);
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+  font-size: 12px;
+  color: var(--gs-text-secondary);
+}
+
+.diffFilePath {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.diffStatAdded {
+  color: #10B981;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.diffStatDeleted {
+  color: #EF4444;
+  font-weight: 600;
+  font-size: 11px;
 }
 
 .diffContent {
@@ -243,27 +434,20 @@
 
 /* ── Diff rendering ── */
 
-.diffHunk {
-  margin-bottom: 2px;
-}
-
 .diffHunkHeader {
-  padding: 4px 12px;
-  background-color: var(--gs-accent-subtle);
-  color: var(--gs-text-muted);
+  padding: 6px 16px;
+  background-color: var(--gs-diff-hunk-bg);
+  color: var(--gs-diff-hunk-text);
   font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
   font-size: 12px;
   line-height: 1.5;
-  border-bottom: 1px solid var(--gs-border-secondary);
 }
 
-.diffTable {
-  width: 100%;
-  border-collapse: collapse;
+.diffLine {
+  display: flex;
   font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
   font-size: 12px;
   line-height: 1.6;
-  table-layout: fixed;
 }
 
 .diffLineNo {
@@ -271,52 +455,49 @@
   min-width: 48px;
   padding: 0 8px;
   text-align: right;
-  color: var(--gs-text-muted);
+  color: var(--gs-diff-line-number);
   user-select: none;
-  vertical-align: top;
-  white-space: nowrap;
-  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.diffLinePrefix {
+  width: 16px;
+  min-width: 16px;
+  text-align: center;
+  user-select: none;
+  flex-shrink: 0;
 }
 
 .diffLineContent {
-  padding: 0 12px;
+  flex: 1;
+  padding: 0 8px;
   white-space: pre-wrap;
   word-break: break-all;
 }
 
-.diffLineContext td {
-  background-color: transparent;
+/* 上下文行 */
+.diffLineContext {
+  color: var(--gs-text-secondary);
 }
 
-.diffLineAddition td {
+/* 新增行 */
+.diffLineAddition {
   background-color: var(--gs-diff-added-bg);
 }
 
+.diffLineAddition .diffLinePrefix,
 .diffLineAddition .diffLineContent {
   color: var(--gs-diff-added-text);
 }
 
-.diffLineDeletion td {
+/* 删除行 */
+.diffLineDeletion {
   background-color: var(--gs-diff-deleted-bg);
 }
 
+.diffLineDeletion .diffLinePrefix,
 .diffLineDeletion .diffLineContent {
   color: var(--gs-diff-deleted-text);
-}
-
-.diffLineHeader td {
-  background-color: var(--gs-accent-subtle);
-  color: var(--gs-text-muted);
-  font-style: italic;
-}
-
-.diffBinary {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px 16px;
-  color: var(--gs-text-muted);
-  font-size: 13px;
 }
 
 .diffPlaceholder {
@@ -325,40 +506,42 @@
   justify-content: center;
   height: 100%;
   color: var(--gs-text-muted);
-  font-size: 14px;
+  font-size: 13px;
 }
 
-/* ── Commit area ── */
+/* ── Commit panel (overlay) ── */
 
-.commitArea {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px;
+.commitOverlay {
+  position: absolute;
+  top: 48px;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  padding: 16px;
   background-color: var(--gs-bg-secondary);
-  border-top: 1px solid var(--gs-border-secondary);
+  border-bottom: 1px solid var(--gs-border-primary);
+  box-shadow: var(--gs-shadow-md);
 }
 
 .commitInput {
   width: 100%;
   min-height: 60px;
   max-height: 120px;
-  padding: 8px 12px;
+  padding: 10px 12px;
   background-color: var(--gs-bg-primary);
   border: 1px solid var(--gs-border-primary);
   border-radius: 6px;
   color: var(--gs-text-primary);
-  font-family: inherit;
-  font-size: 13px;
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+  font-size: 12px;
   line-height: 1.5;
   resize: vertical;
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.15s ease;
 }
 
 .commitInput:focus {
-  border-color: var(--gs-border-focus);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+  border-color: var(--gs-accent-primary);
 }
 
 .commitInput::placeholder {
@@ -369,10 +552,133 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-top: 10px;
 }
 
 .commitActions > :last-child {
   margin-left: auto;
+}
+
+/* ── Stash panel ── */
+
+.stashItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: var(--gs-text-secondary);
+}
+
+.stashMessage {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+}
+
+.stashActionBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--gs-text-muted);
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  transition: color 0.1s ease;
+}
+
+.stashActionBtn:hover {
+  color: var(--gs-text-primary);
+}
+
+.stashActionBtnDanger:hover {
+  color: var(--gs-error-text);
+}
+
+/* ── Discard confirm dialog ── */
+
+.discardOverlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+}
+
+.discardDialog {
+  padding: 20px;
+  background-color: var(--gs-bg-secondary);
+  border: 1px solid var(--gs-border-primary);
+  border-radius: 8px;
+  box-shadow: var(--gs-shadow-lg);
+  min-width: 320px;
+}
+
+.discardTitle {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gs-text-primary);
+}
+
+.discardMessage {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--gs-text-secondary);
+  line-height: 1.5;
+}
+
+.discardActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* ── Tree view ── */
+
+.treeFolder {
+  cursor: pointer;
+  user-select: none;
+  gap: 6px;
+}
+
+.treeFolderChevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  flex-shrink: 0;
+  color: var(--gs-text-muted);
+}
+
+.treeFolderIcon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--gs-text-muted);
+}
+
+.viewModeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: var(--gs-text-muted);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.viewModeBtn:hover {
+  background-color: var(--gs-accent-subtle);
+  color: var(--gs-accent-primary);
 }
 
 /* ── File list scrollbar ── */
@@ -391,5 +697,23 @@
 }
 
 .fileList::-webkit-scrollbar-thumb:hover {
+  background-color: var(--gs-scrollbar-thumb-hover);
+}
+
+.diffContent::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.diffContent::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.diffContent::-webkit-scrollbar-thumb {
+  background-color: var(--gs-scrollbar-thumb);
+  border-radius: 4px;
+}
+
+.diffContent::-webkit-scrollbar-thumb:hover {
   background-color: var(--gs-scrollbar-thumb-hover);
 }

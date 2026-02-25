@@ -1,107 +1,68 @@
-import { type Component, type JSX, Show, For, createSignal } from "solid-js";
-import LayoutGrid from 'lucide-solid/icons/layout-grid';
+import { type Component, createMemo, Show, For } from "solid-js";
+import GitCommitHorizontal from 'lucide-solid/icons/git-commit-horizontal';
 import History from 'lucide-solid/icons/history';
 import GitBranch from 'lucide-solid/icons/git-branch';
-import PanelLeftOpen from 'lucide-solid/icons/panel-left-open';
-import PanelLeftClose from 'lucide-solid/icons/panel-left-close';
-import Folder from 'lucide-solid/icons/folder';
+import GitPullRequest from 'lucide-solid/icons/git-pull-request';
 import Settings from 'lucide-solid/icons/settings';
+import { useI18n } from "@/i18n";
 import styles from "./Sidebar.module.css";
-
-export interface SidebarRepo {
-  id: string;
-  name: string;
-}
 
 export interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
-  repos?: SidebarRepo[];
-  activeRepoId?: string;
-  onRepoSelect?: (id: string) => void;
   activeView?: string;
   onViewChange?: (view: string) => void;
-  onSettingsClick?: () => void;
 }
 
-const quickActions = [
-  { id: "workspace" as const, icon: LayoutGrid, label: "工作区" },
-  { id: "history" as const, icon: History, label: "历史记录" },
-  { id: "branches" as const, icon: GitBranch, label: "分支" },
-];
-
 const Sidebar: Component<SidebarProps> = (props) => {
+  const { t } = useI18n();
   const isCollapsed = () => props.collapsed;
-  const repos = () => props.repos ?? [];
   const activeView = () => props.activeView ?? "workspace";
+
+  const navItems = createMemo(() => [
+    { id: "workspace" as const, icon: GitCommitHorizontal, label: t("sidebar.workspace") },
+    { id: "history" as const, icon: History, label: t("sidebar.history") },
+    { id: "branches" as const, icon: GitBranch, label: t("sidebar.branches") },
+    { id: "pulls" as const, icon: GitPullRequest, label: t("sidebar.pulls") },
+  ]);
 
   return (
     <aside
       class={`${styles.sidebar} ${isCollapsed() ? styles.collapsed : styles.expanded}`}
     >
-      {/* Toggle button */}
-      <button
-        class={styles.toggleBtn}
-        onClick={props.onToggle}
-        title={isCollapsed() ? "\u5C55\u5F00\u4FA7\u8FB9\u680F" : "\u6536\u8D77\u4FA7\u8FB9\u680F"}
-      >
-        {isCollapsed() ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
-      </button>
-
-      {/* Quick actions */}
-      <nav class={styles.quickActions}>
-        <For each={quickActions}>
-          {(action) => (
-            <button
-              class={`${styles.actionBtn} ${activeView() === action.id ? styles.active : ""}`}
-              onClick={() => props.onViewChange?.(action.id)}
-              title={action.label}
-            >
-              <span class={styles.actionIcon}><action.icon size={16} /></span>
-              <Show when={!isCollapsed()}>
-                <span class={styles.actionLabel}>{action.label}</span>
-              </Show>
-            </button>
-          )}
-        </For>
-      </nav>
-
-      {/* Repo list */}
-      <div class={styles.repoSection}>
-        <Show when={!isCollapsed()}>
-          <div class={styles.repoSectionTitle}>{"\u4ED3\u5E93"}</div>
-        </Show>
-        <div class={styles.repoList}>
-          <For each={repos()}>
-            {(repo) => (
+      {/* Top: Navigation */}
+      <div class={styles.sidebarTop}>
+        <nav class={styles.navSection}>
+          <For each={navItems()}>
+            {(item) => (
               <button
-                class={`${styles.repoItem} ${props.activeRepoId === repo.id ? styles.active : ""}`}
-                onClick={() => props.onRepoSelect?.(repo.id)}
-                title={repo.name}
+                class={`${styles.navItem} ${activeView() === item.id ? styles.active : ""}`}
+                onClick={() => props.onViewChange?.(item.id)}
+                title={item.label}
               >
-                <span class={styles.repoIcon}><Folder size={14} /></span>
+                <span class={styles.navIcon}><item.icon size={18} /></span>
                 <Show when={!isCollapsed()}>
-                  <span class={styles.repoName}>{repo.name}</span>
+                  <span class={styles.navLabel}>{item.label}</span>
                 </Show>
               </button>
             )}
           </For>
-        </div>
+
+          <div class={styles.navDivider} />
+
+          <button
+            class={`${styles.navItem} ${activeView() === "settings" ? styles.active : ""}`}
+            onClick={() => props.onViewChange?.("settings")}
+            title={t("sidebar.settings")}
+          >
+            <span class={styles.navIcon}><Settings size={18} /></span>
+            <Show when={!isCollapsed()}>
+              <span class={styles.navLabel}>{t("sidebar.settings")}</span>
+            </Show>
+          </button>
+        </nav>
       </div>
 
-      {/* Settings button */}
-      <div class={styles.bottomSection}>
-        <button
-          class={styles.settingsBtn}
-          onClick={props.onSettingsClick}
-          title={"\u8BBE\u7F6E"}
-        >
-          <span class={styles.settingsIcon}><Settings size={16} /></span>
-          <Show when={!isCollapsed()}>
-            <span class={styles.settingsLabel}>{"\u8BBE\u7F6E"}</span>
-          </Show>
-        </button>
-      </div>
     </aside>
   );
 };
