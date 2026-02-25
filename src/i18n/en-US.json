@@ -196,6 +196,18 @@
     "noPulls": "No pull requests found",
     "loading": "Loading..."
   },
+  "updater": {
+    "title": "Software Update",
+    "newVersion": "New version available",
+    "downloading": "Downloading update…",
+    "installNow": "Update Now",
+    "remindLater": "Remind Later",
+    "upToDate": "You are running the latest version",
+    "checkForUpdates": "Check for Updates",
+    "restartMessage": "Download complete. The app will restart to finish the update.",
+    "retry": "Retry",
+    "checking": "Checking for updates…"
+  },
   "common": {
     "cancel": "Cancel",
     "confirm": "Confirm",

@@ -4,8 +4,12 @@ pub mod config;
 pub mod db;
 pub mod error;
 pub mod git;
+pub mod github;
+pub mod persistence;
 pub mod state;
 pub mod watcher;
+
+use tauri::Manager;
 
 use state::AppState;
 
@@ -21,7 +25,23 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
-        .manage(AppState::new())
+        .plugin(tauri_plugin_window_state::Builder::new().build())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .setup(|app| {
+            let app_data_dir = app
+                .path()
+                .app_data_dir()
+                .expect("failed to resolve app data dir");
+
+            let recent_repos = persistence::load_recent_repos(&app_data_dir)
+                .unwrap_or_else(|e| {
+                    tracing::warn!("Failed to load recent repos: {e}");
+                    Vec::new()
+                });
+
+            app.manage(AppState::new_with_data(app_data_dir, recent_repos));
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             // Repository
             commands::repo::open_repo,
@@ -66,6 +86,7 @@ pub fn run() {
             commands::branch::checkout_branch,
             commands::branch::delete_branch,
             commands::branch::rename_branch,
+            commands::branch::get_branch_tips,
             // Remote
             commands::remote::fetch_remote,
             commands::remote::pull_remote,
@@ -118,6 +139,27 @@ pub fn run() {
             // AI
             commands::ai::generate_commit_message,
             commands::ai::generate_change_summary,
+            // GitHub
+            commands::github::github_check_auth,
+            commands::github::github_save_token,
+            commands::github::github_logout,
+            commands::github::github_detect_repo,
+            commands::github::github_search_repos,
+            commands::github::github_list_pulls,
+            commands::github::github_get_pull,
+            commands::github::github_create_pull,
+            commands::github::github_merge_pull,
+            commands::github::github_list_pr_comments,
+            commands::github::github_create_pr_comment,
+            commands::github::github_list_reviews,
+            commands::github::github_create_review,
+            commands::github::github_list_review_comments,
+            commands::github::github_list_pr_files,
+            commands::github::github_list_labels,
+            commands::github::github_add_labels,
+            commands::github::github_remove_label,
+            commands::github::github_list_collaborators,
+            commands::github::github_request_reviewers,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

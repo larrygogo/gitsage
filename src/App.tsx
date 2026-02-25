@@ -16,16 +16,19 @@ import RefreshCw from "lucide-solid/icons/refresh-cw";
 import GitBranch from "lucide-solid/icons/git-branch";
 import Info from "lucide-solid/icons/info";
 import Code from "lucide-solid/icons/code";
+import RefreshCcw from "lucide-solid/icons/refresh-ccw";
 import AppWindow from "lucide-solid/icons/app-window";
 import History from "lucide-solid/icons/history";
 import Folder from "lucide-solid/icons/folder";
 
 import CloneDialog from "@/components/CloneDialog";
 import RepoPickerDialog from "@/components/RepoPickerDialog";
+import UpdateDialog from "@/components/UpdateDialog";
 import { RepoContext, createRepoStore } from "@/stores/repo";
 import { GitHubContext, createGitHubStore } from "@/stores/github";
 import { SettingsContext, createSettingsStore } from "@/stores/settings";
 import { UiContext, createUiStore } from "@/stores/ui";
+import { UpdaterContext, createUpdaterStore } from "@/stores/updater";
 import { I18nContext, createI18n } from "@/i18n";
 import type { ActiveView } from "@/stores/ui";
 import { useShortcuts } from "@/hooks";
@@ -38,6 +41,7 @@ const App: Component = () => {
   const [ghState, ghActions] = createGitHubStore();
   const [settingsState, settingsActions] = createSettingsStore();
   const [uiState, uiActions] = createUiStore();
+  const [updaterState, updaterActions] = createUpdaterStore();
 
   /** 同步中状态 */
   const [syncing, setSyncing] = createSignal(false);
@@ -86,6 +90,13 @@ const App: Component = () => {
     } catch (err) {
       console.warn("[App] 加载最近仓库列表失败:", err);
     }
+
+    // 延迟 3 秒自动检查更新（静默模式，无更新不弹窗）
+    setTimeout(() => {
+      updaterActions.checkUpdate(true).catch((err) => {
+        console.warn("[App] 自动检查更新失败:", err);
+      });
+    }, 3000);
 
     // 新建窗口（?fresh=1）不恢复上次仓库，直接显示主页
     const isFreshWindow = new URLSearchParams(window.location.search).has("fresh");
@@ -240,6 +251,8 @@ const App: Component = () => {
         { label: i18n.t("toolbar.version"), icon: Info, disabled: true },
         { separator: true, label: "" },
         { label: i18n.t("toolbar.description"), icon: Code, disabled: true },
+        { separator: true, label: "" },
+        { label: i18n.t("updater.checkForUpdates"), icon: RefreshCcw, action: () => updaterActions.checkUpdate() },
       ],
     },
   ]);
@@ -261,6 +274,7 @@ const App: Component = () => {
     <SettingsContext.Provider value={[settingsState, settingsActions]}>
     <I18nContext.Provider value={i18n}>
     <UiContext.Provider value={[uiState, uiActions]}>
+    <UpdaterContext.Provider value={[updaterState, updaterActions]}>
     <RepoContext.Provider value={[repoState, repoActions]}>
     <GitHubContext.Provider value={[ghState, ghActions]}>
       <div class={styles.appLayout}>
@@ -381,8 +395,12 @@ const App: Component = () => {
         onClose={() => setCloneDialogOpen(false)}
         onCloneComplete={handleCloneComplete}
       />
+
+      {/* 更新对话框 */}
+      <UpdateDialog />
     </GitHubContext.Provider>
     </RepoContext.Provider>
+    </UpdaterContext.Provider>
     </UiContext.Provider>
     </I18nContext.Provider>
     </SettingsContext.Provider>
