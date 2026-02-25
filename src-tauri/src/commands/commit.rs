@@ -19,11 +19,12 @@ pub async fn create_commit(
 #[tauri::command]
 pub async fn get_commit_log(
     limit: Option<usize>,
+    all: Option<bool>,
     state: State<'_, AppState>,
 ) -> Result<Vec<CommitInfo>, AppError> {
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.log(limit.unwrap_or(50))
+    repo.log(limit.unwrap_or(200), all.unwrap_or(true))
 }
 
 // ==================== Phase 1: Amend & Undo ====================
@@ -110,9 +111,10 @@ pub async fn get_commit_log_paged(
 pub async fn get_branch_log(
     branch: String,
     limit: Option<usize>,
+    first_parent: Option<bool>,
     state: State<'_, AppState>,
 ) -> Result<Vec<CommitInfo>, AppError> {
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.log_branch(&branch, limit.unwrap_or(200))
+    repo.log_branch(&branch, limit.unwrap_or(200), first_parent.unwrap_or(false))
 }

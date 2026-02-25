@@ -5,6 +5,7 @@ use tauri::State;
 
 use crate::error::AppError;
 use crate::git::repository::GitRepository;
+use crate::persistence;
 use crate::state::{AppState, RepoEntry};
 
 #[tauri::command]
@@ -31,6 +32,11 @@ pub async fn open_repo(path: String, state: State<'_, AppState>) -> Result<Strin
         );
         if recent.len() > 20 {
             recent.truncate(20);
+        }
+
+        // Persist to disk
+        if let Err(e) = persistence::save_recent_repos(&state.app_data_dir, &recent) {
+            tracing::warn!("Failed to save recent repos: {e}");
         }
     }
 

@@ -1,6 +1,7 @@
 pub mod ai;
 pub mod branch;
 pub mod commit;
+pub mod github;
 pub mod merge;
 pub mod remote;
 pub mod repo;

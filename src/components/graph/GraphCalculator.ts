@@ -9,9 +9,14 @@ export interface GraphNode {
 }
 
 export interface GraphEdge {
+  fromId: string;
+  toId: string;
   from: { x: number; y: number };
   to: { x: number; y: number };
   color: string;
+  lane: number;
+  /** 0 = fork-out (pi=0 cross-lane), 1 = straight, 2 = merge (pi>0) */
+  zLayer: number;
 }
 
 export interface GraphLayout {
@@ -22,14 +27,14 @@ export interface GraphLayout {
 
 /** Color palette for swim lanes */
 const LANE_COLORS = [
-  '#4078c0',
-  '#6cc644',
-  '#bd2c00',
-  '#c9510c',
-  '#6e5494',
-  '#0086b3',
-  '#795548',
-  '#e91e63',
+  '#10B981',
+  '#F59E0B',
+  '#3B82F6',
+  '#A855F7',
+  '#EF4444',
+  '#06B6D4',
+  '#EC4899',
+  '#6366F1',
 ];
 
 /**
@@ -44,7 +49,7 @@ export function getLaneColor(lane: number): string {
 const LANE_WIDTH = 20;
 
 /** Vertical spacing between commit rows (px) */
-const ROW_HEIGHT = 32;
+const ROW_HEIGHT = 64;
 
 /**
  * Calculate the graph layout for a list of commits.
@@ -187,19 +192,35 @@ export function calculateGraphLayout(commits: CommitInfo[]): GraphLayout {
       const parentNode = nodeMap.get(parentId);
 
       if (parentNode) {
-        // Determine edge color: use the parent's lane color for merge
-        // edges (pi > 0), child lane for first parent.
+        // Edge color by lane:
+        // - First parent (pi === 0): child's lane — keeps the branch's own
+        //   color along its continuation, including when it crosses lanes.
+        // - Merge parents (pi > 0): parent's (source) lane — the incoming
+        //   merge edge uses the source branch color.
         const edgeLane = pi === 0 ? node.lane : parentNode.lane;
         const color = getLaneColor(edgeLane);
 
+        const isCrossLane = node.x !== parentNode.x;
+        const zLayer = pi > 0 ? 2 : (isCrossLane ? 0 : 1);
+
         edges.push({
+          fromId: node.commitId,
+          toId: parentId,
           from: { x: node.x, y: node.y },
           to: { x: parentNode.x, y: parentNode.y },
           color,
+          lane: edgeLane,
+          zLayer,
         });
       }
     }
   }
+
+  // Sort edges by zLayer for correct visual overlap:
+  //   0 = fork-out diagonals (bottom) — covered by straight lines
+  //   1 = straight vertical lines (middle) — covers fork-outs, covered by merges
+  //   2 = merge diagonals (top) — covers everything
+  edges.sort((a, b) => a.zLayer - b.zLayer);
 
   return { nodes, edges, maxLane };
 }

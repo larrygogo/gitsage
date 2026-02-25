@@ -96,16 +96,16 @@ export async function undoLastCommit(soft: boolean = true): Promise<void> {
   return ipc.undoLastCommit(soft);
 }
 
-export async function getCommitLog(limit?: number): Promise<CommitInfo[]> {
-  return ipc.getCommitLog(limit);
+export async function getCommitLog(limit?: number, all?: boolean): Promise<CommitInfo[]> {
+  return ipc.getCommitLog(limit, all);
 }
 
 export async function getCommitLogPaged(maxCount: number, skip: number): Promise<CommitInfo[]> {
   return ipc.getCommitLogPaged(maxCount, skip);
 }
 
-export async function getBranchLog(branch: string, limit?: number): Promise<CommitInfo[]> {
-  return ipc.getBranchLog(branch, limit);
+export async function getBranchLog(branch: string, limit?: number, firstParent?: boolean): Promise<CommitInfo[]> {
+  return ipc.getBranchLog(branch, limit, firstParent);
 }
 
 export async function resetToCommit(commitId: string, mode: string): Promise<void> {
@@ -148,6 +148,10 @@ export async function deleteBranch(name: string): Promise<void> {
 
 export async function renameBranch(oldName: string, newName: string): Promise<void> {
   return ipc.renameBranch(oldName, newName);
+}
+
+export async function getBranchTips(): Promise<Record<string, string[]>> {
+  return ipc.getBranchTips();
 }
 
 // ==================== 远程操作 ====================

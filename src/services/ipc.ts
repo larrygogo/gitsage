@@ -16,6 +16,19 @@ import type {
   BlameLine,
   LineChange,
   SubmoduleInfo,
+  GitHubRepoInfo,
+  GitHubRepo,
+  AuthStatus,
+  PullRequestSummary,
+  PullRequestDetail,
+  PrComment,
+  PrReview,
+  ReviewComment,
+  PrFile,
+  LabelInfo,
+  CreatePrRequest,
+  MergePrRequest,
+  CreateReviewRequest,
 } from '../types';
 
 /**
@@ -117,16 +130,16 @@ export function undoLastCommit(soft: boolean = true): Promise<void> {
   return ipcInvoke<void>('undo_last_commit', { soft });
 }
 
-export function getCommitLog(limit?: number): Promise<CommitInfo[]> {
-  return ipcInvoke<CommitInfo[]>('get_commit_log', { limit: limit ?? 50 });
+export function getCommitLog(limit?: number, all?: boolean): Promise<CommitInfo[]> {
+  return ipcInvoke<CommitInfo[]>('get_commit_log', { limit: limit ?? 200, all: all ?? true });
 }
 
 export function getCommitLogPaged(maxCount: number, skip: number): Promise<CommitInfo[]> {
   return ipcInvoke<CommitInfo[]>('get_commit_log_paged', { maxCount, skip });
 }
 
-export function getBranchLog(branch: string, limit?: number): Promise<CommitInfo[]> {
-  return ipcInvoke<CommitInfo[]>('get_branch_log', { branch, limit });
+export function getBranchLog(branch: string, limit?: number, firstParent?: boolean): Promise<CommitInfo[]> {
+  return ipcInvoke<CommitInfo[]>('get_branch_log', { branch, limit, firstParent });
 }
 
 export function resetToCommit(commitId: string, mode: string): Promise<void> {
@@ -169,6 +182,10 @@ export function deleteBranch(name: string): Promise<void> {
 
 export function renameBranch(oldName: string, newName: string): Promise<void> {
   return ipcInvoke<void>('rename_branch', { oldName, newName });
+}
+
+export function getBranchTips(): Promise<Record<string, string[]>> {
+  return ipcInvoke<Record<string, string[]>>('get_branch_tips');
 }
 
 // ==================== 远程操作 ====================
@@ -411,4 +428,86 @@ export function updateAiConfig(config: AiConfig): Promise<void> {
 
 export function setAiApiKey(provider: string, apiKey: string): Promise<void> {
   return ipcInvoke<void>('set_ai_api_key', { provider, apiKey });
+}
+
+// ==================== GitHub ====================
+
+export function githubCheckAuth(): Promise<AuthStatus> {
+  return ipcInvoke<AuthStatus>('github_check_auth');
+}
+
+export function githubSaveToken(token: string): Promise<void> {
+  return ipcInvoke<void>('github_save_token', { token });
+}
+
+export function githubLogout(): Promise<void> {
+  return ipcInvoke<void>('github_logout');
+}
+
+export function githubSearchRepos(query: string, perPage: number): Promise<GitHubRepoInfo[]> {
+  return ipcInvoke<GitHubRepoInfo[]>('github_search_repos', { query, perPage });
+}
+
+export function githubDetectRepo(): Promise<GitHubRepo | null> {
+  return ipcInvoke<GitHubRepo | null>('github_detect_repo');
+}
+
+export function githubListPulls(owner: string, repo: string, pullState: string, page: number, perPage: number): Promise<PullRequestSummary[]> {
+  return ipcInvoke<PullRequestSummary[]>('github_list_pulls', { owner, repo, pullState, page, perPage });
+}
+
+export function githubGetPull(owner: string, repo: string, number: number): Promise<PullRequestDetail> {
+  return ipcInvoke<PullRequestDetail>('github_get_pull', { owner, repo, number });
+}
+
+export function githubCreatePull(owner: string, repo: string, req: CreatePrRequest): Promise<PullRequestDetail> {
+  return ipcInvoke<PullRequestDetail>('github_create_pull', { owner, repo, req });
+}
+
+export function githubMergePull(owner: string, repo: string, number: number, req: MergePrRequest): Promise<void> {
+  return ipcInvoke<void>('github_merge_pull', { owner, repo, number, req });
+}
+
+export function githubListPrComments(owner: string, repo: string, number: number): Promise<PrComment[]> {
+  return ipcInvoke<PrComment[]>('github_list_pr_comments', { owner, repo, number });
+}
+
+export function githubCreatePrComment(owner: string, repo: string, number: number, body: string): Promise<PrComment> {
+  return ipcInvoke<PrComment>('github_create_pr_comment', { owner, repo, number, body });
+}
+
+export function githubListReviews(owner: string, repo: string, number: number): Promise<PrReview[]> {
+  return ipcInvoke<PrReview[]>('github_list_reviews', { owner, repo, number });
+}
+
+export function githubCreateReview(owner: string, repo: string, number: number, req: CreateReviewRequest): Promise<PrReview> {
+  return ipcInvoke<PrReview>('github_create_review', { owner, repo, number, req });
+}
+
+export function githubListReviewComments(owner: string, repo: string, number: number): Promise<ReviewComment[]> {
+  return ipcInvoke<ReviewComment[]>('github_list_review_comments', { owner, repo, number });
+}
+
+export function githubListPrFiles(owner: string, repo: string, number: number): Promise<PrFile[]> {
+  return ipcInvoke<PrFile[]>('github_list_pr_files', { owner, repo, number });
+}
+
+export function githubListLabels(owner: string, repo: string): Promise<LabelInfo[]> {
+  return ipcInvoke<LabelInfo[]>('github_list_labels', { owner, repo });
+}
+
+export function githubAddLabels(owner: string, repo: string, number: number, labels: string[]): Promise<LabelInfo[]> {
+  return ipcInvoke<LabelInfo[]>('github_add_labels', { owner, repo, number, labels });
+}
+
+export function githubRemoveLabel(owner: string, repo: string, number: number, label: string): Promise<void> {
+  return ipcInvoke<void>('github_remove_label', { owner, repo, number, label });
+}
+
+export function githubListCollaborators(owner: string, repo: string): Promise<import('../types').UserInfo[]> {
+  return ipcInvoke<import('../types').UserInfo[]>('github_list_collaborators', { owner, repo });
+}
+
+export function githubRequestReviewers(owner: string, repo: string, number: number, reviewers: string[]): Promise<void> {
+  return ipcInvoke<void>('github_request_reviewers', { owner, repo, number, reviewers });
 }

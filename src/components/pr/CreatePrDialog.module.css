@@ -1,0 +1,710 @@
+/* ── Create PR Modal ── */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  width: 560px;
+  max-height: 90vh;
+  border-radius: 16px;
+  background-color: var(--gs-surface-elevated, #141414);
+  border: 1px solid var(--gs-border-subtle, #2E2E2E);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Header (56px) ── */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  min-height: 56px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--gs-border-primary);
+  border-radius: 16px 16px 0 0;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.headerIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background-color: #FF840018;
+  color: #FF8400;
+  flex-shrink: 0;
+}
+
+.headerTitle {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gs-text-primary);
+}
+
+.closeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: none;
+  color: var(--gs-text-muted);
+  cursor: pointer;
+  transition: background-color 0.12s, color 0.12s;
+}
+
+.closeBtn:hover {
+  background-color: var(--gs-bg-tertiary);
+  color: var(--gs-text-primary);
+}
+
+/* ── Scrollable body ── */
+
+.body {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Branch Section ── */
+
+.branchSection {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 16px 24px 20px;
+}
+
+/* ── Branch Picker (custom dropdown) ── */
+
+.branchPicker {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.branchTrigger {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border-radius: 10px;
+  background-color: var(--gs-bg-tertiary, #111111);
+  border: 1px solid var(--gs-border-subtle, #2E2E2E);
+  cursor: pointer;
+  transition: border-color 0.12s, background-color 0.12s;
+  box-sizing: border-box;
+}
+
+.branchTrigger:hover {
+  border-color: var(--gs-text-muted);
+}
+
+.branchTriggerOpen {
+  border-color: #FF840060;
+  background-color: #FF840008;
+}
+
+/* Label row (Source / Target) */
+.branchTriggerLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px 4px;
+}
+
+.branchTriggerLabelText {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: var(--gs-text-muted);
+}
+
+/* Value row */
+.branchTriggerValue {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 2px 12px 8px;
+}
+
+.branchTriggerName {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.branchTriggerIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.branchTriggerText {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gs-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.branchTriggerPlaceholder {
+  color: var(--gs-text-muted);
+  font-weight: 400;
+}
+
+.branchTriggerChevron {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--gs-text-muted);
+}
+
+.branchTriggerOpen .branchTriggerChevron {
+  color: var(--gs-accent-primary);
+}
+
+/* Dropdown panel */
+.branchDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 230px;
+  width: 100%;
+  max-height: 260px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  background-color: var(--gs-bg-tertiary, #111111);
+  border: 1px solid var(--gs-border-subtle, #2E2E2E);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 2px 4px rgba(0, 0, 0, 0.3);
+  z-index: 200;
+  overflow: hidden;
+}
+
+.branchSearchBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0 10px;
+  border-bottom: 1px solid var(--gs-border-primary);
+}
+
+.branchSearchIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--gs-text-muted);
+}
+
+.branchSearchInput {
+  flex: 1;
+  height: 100%;
+  border: none;
+  background: none;
+  outline: none;
+  color: var(--gs-text-primary);
+  font-family: "Geist Sans", sans-serif;
+  font-size: 12px;
+}
+
+.branchSearchInput::placeholder {
+  color: var(--gs-text-muted);
+}
+
+.branchList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.branchRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 10px;
+  margin: 0 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.branchRow:hover {
+  background-color: var(--gs-menu-hover-bg, #FF840012);
+}
+
+.branchRowActive {
+  background-color: #FF840012;
+}
+
+.branchRowIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--gs-text-muted);
+}
+
+.branchRowActive .branchRowIcon {
+  color: #10B981;
+}
+
+.branchRowText {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  color: var(--gs-text-secondary);
+}
+
+.branchRowActive .branchRowText {
+  color: var(--gs-text-primary);
+  font-weight: 600;
+}
+
+.branchRowCheck {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: #FF8400;
+}
+
+.branchEmpty {
+  padding: 12px 10px;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 11px;
+  color: var(--gs-text-muted);
+  text-align: center;
+}
+
+/* Scrollbar for branch list */
+.branchList::-webkit-scrollbar {
+  width: 4px;
+}
+
+.branchList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.branchList::-webkit-scrollbar-thumb {
+  background-color: var(--gs-scrollbar-thumb);
+  border-radius: 4px;
+}
+
+.arrowCircle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 14px;
+  background-color: #FF840015;
+  color: #FF8400;
+  flex-shrink: 0;
+}
+
+/* ── Form Body ── */
+
+.formBody {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 24px;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldLabel {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gs-text-muted);
+}
+
+.titleInput {
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 8px;
+  background-color: var(--gs-bg-tertiary, #1A1A1A);
+  border: 1px solid var(--gs-border-subtle, #2E2E2E);
+  color: var(--gs-text-primary);
+  font-family: "Geist Sans", sans-serif;
+  font-size: 13px;
+  outline: none;
+  box-sizing: border-box;
+  width: 100%;
+  transition: border-color 0.12s;
+}
+
+.titleInput:focus {
+  border-color: var(--gs-accent-primary);
+}
+
+.titleInput::placeholder {
+  color: var(--gs-text-muted);
+}
+
+.descInput {
+  min-height: 100px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background-color: var(--gs-bg-tertiary, #1A1A1A);
+  border: 1px solid var(--gs-border-subtle, #2E2E2E);
+  color: var(--gs-text-secondary);
+  font-family: "Geist Sans", sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  outline: none;
+  resize: vertical;
+  box-sizing: border-box;
+  width: 100%;
+  transition: border-color 0.12s;
+}
+
+.descInput:focus {
+  border-color: var(--gs-accent-primary);
+}
+
+.descInput::placeholder {
+  color: var(--gs-text-muted);
+}
+
+/* ── Meta Section ── */
+
+.metaSection {
+  display: flex;
+  gap: 16px;
+  padding: 8px 24px;
+}
+
+.metaGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.metaLabel {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gs-text-muted);
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.metaEmpty {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 11px;
+  color: var(--gs-text-muted);
+}
+
+/* Label pill */
+.labelPill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 13px;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.12s;
+}
+
+.labelPill:hover {
+  opacity: 0.7;
+}
+
+.labelPillDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Reviewer chip */
+.reviewerChip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 8px 0 4px;
+  border-radius: 15px;
+  background-color: var(--gs-bg-tertiary, #1A1A1A);
+  border: 1px solid var(--gs-border-subtle, #2E2E2E);
+  cursor: pointer;
+  transition: border-color 0.12s;
+}
+
+.reviewerChip:hover {
+  border-color: var(--gs-text-muted);
+}
+
+.reviewerAvatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.reviewerName {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: #D1D5DB;
+}
+
+/* Add button (round) */
+.metaAddBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 13px;
+  border: 1px solid var(--gs-border-subtle, #2E2E2E);
+  background: none;
+  color: var(--gs-text-muted);
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s;
+}
+
+.metaAddBtn:hover {
+  border-color: var(--gs-text-muted);
+  color: var(--gs-text-secondary);
+}
+
+/* Dropdown picker for Labels / Reviewers — opens UPWARD */
+.metaDropdown {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  min-width: 200px;
+  max-height: 240px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  border-radius: 10px;
+  background-color: var(--gs-bg-tertiary, #111111);
+  border: 1px solid var(--gs-border-subtle, #2E2E2E);
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.6), 0 -2px 4px rgba(0, 0, 0, 0.3);
+  z-index: 200;
+  padding: 4px 0;
+}
+
+.metaDropdownItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 34px;
+  padding: 4px 10px;
+  margin: 0 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 12px;
+  color: var(--gs-text-secondary, #B8B9B6);
+  transition: background-color 0.1s;
+  flex-shrink: 0;
+}
+
+.metaDropdownItem:hover {
+  background-color: #FF840012;
+  color: var(--gs-text-primary, #FAFAFA);
+}
+
+.metaDropdownItemActive {
+  background-color: #FF840012;
+  color: var(--gs-text-primary, #FAFAFA);
+  font-weight: 500;
+}
+
+.metaDropdown::-webkit-scrollbar {
+  width: 4px;
+}
+
+.metaDropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.metaDropdown::-webkit-scrollbar-thumb {
+  background-color: var(--gs-scrollbar-thumb);
+  border-radius: 4px;
+}
+
+/* ── Error message ── */
+
+.error {
+  padding: 8px 24px;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 12px;
+  color: var(--gs-error-text, #EF4444);
+}
+
+/* ── Footer (64px) ── */
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  min-height: 64px;
+  padding: 0 24px;
+  border-top: 1px solid var(--gs-border-primary);
+  border-radius: 0 0 16px 16px;
+}
+
+/* Draft toggle */
+.draftOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.toggle {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  background-color: var(--gs-border-subtle, #2E2E2E);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: background-color 0.2s;
+}
+
+.toggleActive {
+  background-color: #FF8400;
+}
+
+.toggleDot {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: var(--gs-text-muted);
+  transition: left 0.2s, background-color 0.2s;
+}
+
+.toggleActive .toggleDot {
+  left: 18px;
+  background-color: #0A0A0A;
+}
+
+.draftText {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 12px;
+  color: var(--gs-text-muted);
+}
+
+/* Button group */
+.buttonGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cancelBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid var(--gs-border-subtle, #2E2E2E);
+  background: none;
+  color: var(--gs-text-secondary);
+  font-family: "Geist Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s;
+}
+
+.cancelBtn:hover {
+  border-color: var(--gs-text-muted);
+  color: var(--gs-text-primary);
+}
+
+.createBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 20px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(180deg, #FF8400, #FF6B00);
+  color: #0A0A0A;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #FF840040;
+  transition: opacity 0.15s;
+}
+
+.createBtn:hover {
+  opacity: 0.9;
+}
+
+.createBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Scrollbar ── */
+.body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.body::-webkit-scrollbar-thumb {
+  background-color: var(--gs-scrollbar-thumb);
+  border-radius: 4px;
+}

@@ -1,0 +1,155 @@
+/* ── GitHubAuth — Cursor-style Auth Card ── */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 32px 24px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* ── GitHub Icon ── */
+
+.icon {
+  color: var(--gs-accent-primary);
+  opacity: 0.85;
+}
+
+.icon svg {
+  display: block;
+}
+
+/* ── Title Area ── */
+
+.titleArea {
+  text-align: center;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gs-text-primary);
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--gs-text-muted);
+  line-height: 1.5;
+}
+
+/* ── gh CLI Info Card ── */
+
+.cliCard {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  background-color: var(--gs-accent-subtle, rgba(59, 130, 246, 0.06));
+  border: 1px solid var(--gs-border-primary);
+  border-left: 3px solid var(--gs-accent-primary);
+  border-radius: var(--gs-radius-md, 6px);
+  font-size: 12px;
+  color: var(--gs-text-secondary);
+  line-height: 1.6;
+}
+
+.cliCard code {
+  font-size: 11px;
+  padding: 1px 5px;
+  background: var(--gs-bg-tertiary);
+  border-radius: 3px;
+  font-family: monospace;
+}
+
+.cliCardActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ── PAT Input Card ── */
+
+.patCard {
+  width: 100%;
+  background-color: var(--gs-bg-secondary);
+  border: 1px solid var(--gs-border-primary);
+  border-radius: var(--gs-radius-lg, 8px);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.patLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gs-text-primary);
+}
+
+.patInputRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.patInput {
+  flex: 1;
+  height: 34px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-family: monospace;
+  border: 1px solid var(--gs-border-primary);
+  border-radius: var(--gs-radius-md, 6px);
+  background: var(--gs-bg-primary);
+  color: var(--gs-text-primary);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.patInput:focus {
+  border-color: var(--gs-accent-primary);
+  box-shadow: 0 0 0 2px var(--gs-accent-subtle, rgba(59, 130, 246, 0.15));
+}
+
+.patInput::placeholder {
+  color: var(--gs-text-muted);
+}
+
+.patHint {
+  font-size: 11px;
+  color: var(--gs-text-muted);
+  line-height: 1.5;
+}
+
+.patHint code {
+  font-size: 11px;
+  padding: 1px 4px;
+  background: var(--gs-bg-tertiary);
+  border-radius: 3px;
+  font-family: monospace;
+}
+
+.patHint a {
+  color: var(--gs-accent-primary);
+  text-decoration: none;
+}
+
+.patHint a:hover {
+  text-decoration: underline;
+}
+
+/* ── Error Card ── */
+
+.errorCard {
+  width: 100%;
+  font-size: 12px;
+  color: var(--gs-error-text, #cf222e);
+  padding: 8px 12px;
+  background-color: var(--gs-error-bg, rgba(207, 34, 46, 0.06));
+  border: 1px solid var(--gs-error-border, rgba(207, 34, 46, 0.2));
+  border-radius: var(--gs-radius-md, 6px);
+  line-height: 1.5;
+}

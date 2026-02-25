@@ -1,0 +1,310 @@
+/* ── RepoPickerDialog ── */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  animation: gs-picker-fade-in 0.12s ease-out;
+}
+
+@keyframes gs-picker-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.card {
+  width: 560px;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--gs-surface-elevated);
+  border: 1px solid var(--gs-border-subtle);
+  border-radius: 12px;
+  box-shadow: var(--gs-shadow-lg);
+  overflow: hidden;
+  animation: gs-picker-slide-up 0.15s ease-out;
+}
+
+@keyframes gs-picker-slide-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Header with search ── */
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--gs-border-primary);
+}
+
+.searchIcon {
+  display: flex;
+  align-items: center;
+  color: var(--gs-text-dim);
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  background: none;
+  outline: none;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 14px;
+  color: var(--gs-text-primary);
+  padding: 0;
+}
+
+.searchInput::placeholder {
+  color: var(--gs-text-dim);
+}
+
+.shortcutHint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background-color: var(--gs-accent-subtle);
+  border: 1px solid var(--gs-border-subtle);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  color: var(--gs-text-dim);
+  flex-shrink: 0;
+}
+
+/* ── Content area (scrollable) ── */
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+/* ── Section ── */
+
+.section {
+  padding: 0 8px;
+}
+
+.section + .section {
+  margin-top: 4px;
+}
+
+.sectionLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+}
+
+.sectionDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--gs-accent-primary);
+  flex-shrink: 0;
+}
+
+.sectionDotGithub {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--gs-text-muted);
+  flex-shrink: 0;
+}
+
+.sectionText {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  color: var(--gs-text-muted);
+}
+
+/* ── Repo items ── */
+
+.repoItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.1s;
+  text-align: left;
+}
+
+.repoItem:hover {
+  background-color: var(--gs-accent-subtle);
+}
+
+.repoName {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gs-text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.repoItem:hover .repoName {
+  color: var(--gs-text-primary);
+}
+
+.repoPath {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 12px;
+  color: var(--gs-text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1;
+  text-align: right;
+}
+
+/* ── GitHub repo items ── */
+
+.ghRepoItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.1s;
+  text-align: left;
+}
+
+.ghRepoItem:hover {
+  background-color: var(--gs-accent-subtle);
+}
+
+.ghRepoInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.ghRepoFullName {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gs-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ghRepoItem:hover .ghRepoFullName {
+  color: var(--gs-text-primary);
+}
+
+.ghRepoDesc {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 11px;
+  color: var(--gs-text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ghRepoBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.privateBadge {
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--gs-text-dim);
+  background-color: var(--gs-accent-subtle);
+  border: 1px solid var(--gs-border-subtle);
+}
+
+/* ── Empty / Loading ── */
+
+.emptyText {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60px;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 13px;
+  color: var(--gs-text-muted);
+}
+
+.loadingText {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 60px;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 13px;
+  color: var(--gs-text-dim);
+}
+
+/* ── Footer ── */
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  border-top: 1px solid var(--gs-border-primary);
+}
+
+.footerHints {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.footerHint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 11px;
+  color: var(--gs-text-dim);
+}
+
+.footerKey {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 3px;
+  background-color: var(--gs-accent-subtle);
+  border: 1px solid var(--gs-border-subtle);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--gs-text-muted);
+}

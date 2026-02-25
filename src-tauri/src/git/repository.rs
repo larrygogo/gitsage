@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use serde::Serialize;
@@ -223,8 +224,8 @@ impl GitRepository {
     }
 
     /// Get commit log
-    pub fn log(&self, max_count: usize) -> AppResult<Vec<CommitInfo>> {
-        self.libgit.log(max_count)
+    pub fn log(&self, max_count: usize, all: bool) -> AppResult<Vec<CommitInfo>> {
+        self.libgit.log(max_count, all)
     }
 
     // Phase 1 reads
@@ -291,8 +292,8 @@ impl GitRepository {
     }
 
     /// Get commit log for a specific branch
-    pub fn log_branch(&self, branch: &str, max_count: usize) -> AppResult<Vec<CommitInfo>> {
-        self.libgit.log_branch(branch, max_count)
+    pub fn log_branch(&self, branch: &str, max_count: usize, first_parent: bool) -> AppResult<Vec<CommitInfo>> {
+        self.libgit.log_branch(branch, max_count, first_parent)
     }
 
     // Phase 5 reads
@@ -305,6 +306,11 @@ impl GitRepository {
     /// Get submodules
     pub fn submodules(&self) -> AppResult<Vec<SubmoduleInfo>> {
         self.libgit.submodules()
+    }
+
+    /// Get branch tip commit → branch names mapping
+    pub fn branch_tips(&self) -> AppResult<HashMap<String, Vec<String>>> {
+        self.libgit.branch_tips()
     }
 
     // ==================== Write operations (via git CLI) ====================

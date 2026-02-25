@@ -43,47 +43,48 @@
 /* ── Color variants ── */
 
 .primary {
-  background-color: var(--gs-color-primary, #3b82f6);
-  color: var(--gs-color-primary-foreground, #ffffff);
-  border-color: var(--gs-color-primary, #3b82f6);
+  background-color: var(--gs-accent-primary, #FF8400);
+  color: #0A0A0A;
+  border-color: var(--gs-accent-primary, #FF8400);
 }
 
 .primary:hover:not(:disabled) {
-  background-color: var(--gs-color-primary-hover, #2563eb);
-  border-color: var(--gs-color-primary-hover, #2563eb);
+  background-color: var(--gs-accent-hover, #FF6B00);
+  border-color: var(--gs-accent-hover, #FF6B00);
 }
 
 .primary:active:not(:disabled) {
-  background-color: var(--gs-color-primary-active, #1d4ed8);
-  border-color: var(--gs-color-primary-active, #1d4ed8);
+  background-color: var(--gs-accent-active, #E67800);
+  border-color: var(--gs-accent-active, #E67800);
 }
 
 .secondary {
-  background-color: var(--gs-color-secondary, #f1f5f9);
-  color: var(--gs-color-secondary-foreground, #334155);
-  border-color: var(--gs-color-secondary-border, #e2e8f0);
+  background-color: var(--gs-surface-elevated, #f1f5f9);
+  color: var(--gs-text-secondary, #334155);
+  border-color: var(--gs-border-primary, #e2e8f0);
 }
 
 .secondary:hover:not(:disabled) {
-  background-color: var(--gs-color-secondary-hover, #e2e8f0);
+  background-color: var(--gs-bg-tertiary, #e2e8f0);
 }
 
 .secondary:active:not(:disabled) {
-  background-color: var(--gs-color-secondary-active, #cbd5e1);
+  background-color: var(--gs-bg-tertiary, #cbd5e1);
 }
 
 .ghost {
   background-color: transparent;
-  color: var(--gs-color-ghost-foreground, #475569);
-  border-color: transparent;
+  color: var(--gs-text-secondary, #475569);
+  border-color: var(--gs-border-primary, transparent);
 }
 
 .ghost:hover:not(:disabled) {
-  background-color: var(--gs-color-ghost-hover, rgba(0, 0, 0, 0.06));
+  background-color: var(--gs-bg-tertiary, rgba(0, 0, 0, 0.06));
+  color: var(--gs-text-primary);
 }
 
 .ghost:active:not(:disabled) {
-  background-color: var(--gs-color-ghost-active, rgba(0, 0, 0, 0.1));
+  background-color: var(--gs-bg-tertiary, rgba(0, 0, 0, 0.1));
 }
 
 .danger {
@@ -105,8 +106,8 @@
 /* ── States ── */
 
 .button:focus-visible {
-  box-shadow: 0 0 0 2px var(--gs-color-background, #fff),
-              0 0 0 4px var(--gs-color-primary, #3b82f6);
+  box-shadow: 0 0 0 2px var(--gs-bg-primary, #fff),
+              0 0 0 4px var(--gs-accent-primary, #FF8400);
 }
 
 .button:disabled {

@@ -1,5 +1,6 @@
 import { createContext, useContext } from 'solid-js';
-import { createStore } from 'solid-js/store';
+import type { SetStoreFunction } from 'solid-js/store';
+import { createPersistedStore } from '../utils/createPersisted';
 import type { AiConfig, ProviderKind } from '../types';
 
 // ==================== 类型定义 ====================
@@ -51,7 +52,10 @@ export function useSettings(): SettingsStore {
 // ==================== Store 工厂函数 ====================
 
 export function createSettingsStore(): SettingsStore {
-  const [state, setState] = createStore<SettingsState>({ ...initialState });
+  const [state, setState] = createPersistedStore<SettingsState>(
+    'gitsage:settings',
+    initialState,
+  );
 
   const actions: SettingsActions = {
     setTheme(theme: ThemeMode) {

@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use tauri::State;
 
 use crate::error::AppError;
@@ -37,6 +39,13 @@ pub async fn delete_branch(name: String, state: State<'_, AppState>) -> Result<(
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
     repo.delete_branch(&name).await
+}
+
+#[tauri::command]
+pub async fn get_branch_tips(state: State<'_, AppState>) -> Result<HashMap<String, Vec<String>>, AppError> {
+    let repo = state.current_repo.lock().await;
+    let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
+    repo.branch_tips()
 }
 
 // ==================== Phase 2: Rename ====================

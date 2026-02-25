@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::path::Path;
 use std::sync::Mutex;
 
@@ -153,7 +154,17 @@ impl LibGitOps {
                 .and_then(|h| h.peel_to_tree().ok());
             repo.diff_tree_to_index(head_tree.as_ref(), None, Some(&mut opts))?
         } else {
-            repo.diff_index_to_workdir(None, Some(&mut opts))?
+            // 检查是否为工作区新文件（untracked）
+            let status = repo.status_file(std::path::Path::new(path))?;
+            if status.contains(git2::Status::WT_NEW) {
+                // 新文件：用空树 vs 工作区做 diff，显示全部内容为新增
+                opts.include_untracked(true);
+                let empty_tree_oid = repo.treebuilder(None)?.write()?;
+                let empty_tree = repo.find_tree(empty_tree_oid)?;
+                repo.diff_tree_to_workdir(Some(&empty_tree), Some(&mut opts))?
+            } else {
+                repo.diff_index_to_workdir(None, Some(&mut opts))?
+            }
         };
 
         Self::parse_diff(&diff)
@@ -281,10 +292,15 @@ impl LibGitOps {
         Ok(result)
     }
 
-    pub fn log(&self, max_count: usize) -> AppResult<Vec<CommitInfo>> {
+    pub fn log(&self, max_count: usize, all: bool) -> AppResult<Vec<CommitInfo>> {
         let repo = self.lock_repo()?;
         let mut revwalk = repo.revwalk()?;
-        revwalk.push_head()?;
+        if all {
+            revwalk.push_glob("refs/heads/*")?;
+            revwalk.push_glob("refs/tags/*")?;
+        } else {
+            revwalk.push_head()?;
+        }
         revwalk.set_sorting(git2::Sort::TIME)?;
 
         let mut commits = Vec::new();
@@ -731,7 +747,7 @@ impl LibGitOps {
     }
 
     /// Get commit log for a specific branch.
-    pub fn log_branch(&self, branch: &str, max_count: usize) -> AppResult<Vec<CommitInfo>> {
+    pub fn log_branch(&self, branch: &str, max_count: usize, first_parent: bool) -> AppResult<Vec<CommitInfo>> {
         let repo = self.lock_repo()?;
         let mut revwalk = repo.revwalk()?;
 
@@ -748,6 +764,9 @@ impl LibGitOps {
 
         revwalk.push(oid)?;
         revwalk.set_sorting(git2::Sort::TIME)?;
+        if first_parent {
+            revwalk.simplify_first_parent()?;
+        }
 
         let mut commits = Vec::new();
         for (i, oid) in revwalk.enumerate() {
@@ -885,6 +904,43 @@ impl LibGitOps {
         }
 
         Ok(changes)
+    }
+
+    /// Get a mapping of ref tip commit IDs to ref names (branches + tags).
+    pub fn branch_tips(&self) -> AppResult<HashMap<String, Vec<String>>> {
+        let repo = self.lock_repo()?;
+        let mut tips: HashMap<String, Vec<String>> = HashMap::new();
+
+        // Add branch tips
+        let branches = repo.branches(None)?;
+        for branch in branches {
+            let (branch, _) = branch?;
+            let name = branch.name()?.unwrap_or("").to_string();
+            if let Some(oid) = branch.get().target() {
+                tips.entry(oid.to_string()).or_default().push(name);
+            }
+        }
+
+        // Add tag tips
+        let tag_names = repo.tag_names(None)?;
+        for name in tag_names.iter().flatten() {
+            let refname = format!("refs/tags/{}", name);
+            if let Ok(reference) = repo.find_reference(&refname) {
+                // Peel to the target commit (works for both annotated and lightweight tags)
+                let target_oid = if let Ok(obj) = reference.peel(git2::ObjectType::Commit) {
+                    obj.id()
+                } else if let Some(oid) = reference.resolve().ok().and_then(|r| r.target()) {
+                    oid
+                } else {
+                    continue;
+                };
+                tips.entry(target_oid.to_string())
+                    .or_default()
+                    .push(format!("tag:{}", name));
+            }
+        }
+
+        Ok(tips)
     }
 
     /// List all submodules in the repository.

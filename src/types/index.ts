@@ -27,3 +27,22 @@ export type {
   ProviderConfig,
   AiConfig,
 } from './ai';
+
+export type {
+  GitHubRepoInfo,
+  GitHubRepo,
+  AuthStatus,
+  UserInfo,
+  LabelInfo,
+  PrBranchRef,
+  PullRequestSummary,
+  PullRequestDetail,
+  PrComment,
+  PrReview,
+  ReviewComment,
+  PrFile,
+  CreatePrRequest,
+  MergePrRequest,
+  CreateReviewRequest,
+  ReviewCommentRequest,
+} from './github';

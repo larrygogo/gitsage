@@ -3,11 +3,10 @@
 .appLayout {
   display: grid;
   grid-template-columns: auto 1fr;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 1fr;
   grid-template-areas:
-    "sidebar toolbar"
-    "sidebar main"
-    "statusbar statusbar";
+    "toolbar toolbar"
+    "sidebar main";
   width: 100vw;
   height: 100vh;
   overflow: hidden;
@@ -22,18 +21,15 @@
 
 .toolbarArea {
   grid-area: toolbar;
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
+  z-index: 50;
 }
 
 .mainArea {
   grid-area: main;
-  overflow: auto;
-  position: relative;
-}
-
-.statusBarArea {
-  grid-area: statusbar;
   overflow: hidden;
+  position: relative;
 }
 
 /* ── Scrollbar for main area ── */

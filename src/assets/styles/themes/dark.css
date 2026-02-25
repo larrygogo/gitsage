@@ -1,81 +1,92 @@
 /*
  * GitSage Dark Theme
- * 暗色主题 CSS 变量定义（VS Code 风格深色方案）
+ * 暗色主题 CSS 变量定义（橙色强调色 + 深黑背景方案）
  */
 
 [data-theme="dark"] {
   /* ========== 背景色 ========== */
-  --gs-bg-primary: #1e1e2e;
-  --gs-bg-secondary: #181825;
-  --gs-bg-tertiary: #262637;
+  --gs-bg-primary: #0A0A0A;
+  --gs-bg-secondary: #0D0D0D;
+  --gs-bg-tertiary: #111111;
 
   /* ========== 文字色 ========== */
-  --gs-text-primary: #cdd6f4;
-  --gs-text-secondary: #a6adc8;
-  --gs-text-muted: #6c7086;
+  --gs-text-primary: #FAFAFA;
+  --gs-text-secondary: #B8B9B6;
+  --gs-text-muted: #6B7280;
 
   /* ========== 边框色 ========== */
-  --gs-border-primary: #383a5c;
-  --gs-border-secondary: #2e2e48;
-  --gs-border-focus: #89b4fa;
+  --gs-border-primary: #1E1E1E;
+  --gs-border-secondary: #1E1E1E;
+  --gs-border-focus: #FF8400;
 
-  /* ========== 强调色 / 品牌色（蓝色系） ========== */
-  --gs-accent-primary: #89b4fa;
-  --gs-accent-hover: #74a8fc;
-  --gs-accent-active: #5b9afd;
-  --gs-accent-subtle: #1e2a45;
-  --gs-accent-text: #b4d0fb;
+  /* ========== 强调色 / 品牌色（橙色系） ========== */
+  --gs-accent-primary: #FF8400;
+  --gs-accent-hover: #FF6B00;
+  --gs-accent-active: #E67800;
+  --gs-accent-subtle: #1A1A1A;
+  --gs-accent-text: #FF8400;
 
   /* ========== 语义色 - 成功 ========== */
-  --gs-success-bg: #0d2818;
-  --gs-success-text: #a6e3a1;
-  --gs-success-border: #40a040;
-  --gs-success-solid: #a6e3a1;
+  --gs-success-bg: #10B98115;
+  --gs-success-text: #10B981;
+  --gs-success-border: #10B981;
+  --gs-success-solid: #10B981;
 
   /* ========== 语义色 - 警告 ========== */
-  --gs-warning-bg: #2d2206;
-  --gs-warning-text: #f9e2af;
-  --gs-warning-border: #b8860b;
-  --gs-warning-solid: #f9e2af;
+  --gs-warning-bg: #F59E0B15;
+  --gs-warning-text: #F59E0B;
+  --gs-warning-border: #F59E0B;
+  --gs-warning-solid: #F59E0B;
 
   /* ========== 语义色 - 错误 ========== */
-  --gs-error-bg: #2d0f0f;
-  --gs-error-text: #f38ba8;
-  --gs-error-border: #a03030;
-  --gs-error-solid: #f38ba8;
+  --gs-error-bg: #EF444415;
+  --gs-error-text: #EF4444;
+  --gs-error-border: #EF4444;
+  --gs-error-solid: #EF4444;
 
   /* ========== Diff 专用色 ========== */
   /* Added（绿） */
-  --gs-diff-added-bg: #12261e;
-  --gs-diff-added-text: #a6e3a1;
-  --gs-diff-added-line-bg: #1a3a2a;
-  --gs-diff-added-word-bg: #2d5a3d;
+  --gs-diff-added-bg: #10B98115;
+  --gs-diff-added-text: #10B981;
+  --gs-diff-added-line-bg: #10B98120;
+  --gs-diff-added-word-bg: #10B98130;
 
   /* Deleted（红） */
-  --gs-diff-deleted-bg: #2d1219;
-  --gs-diff-deleted-text: #f38ba8;
-  --gs-diff-deleted-line-bg: #3d1a25;
-  --gs-diff-deleted-word-bg: #5c2535;
+  --gs-diff-deleted-bg: #EF444415;
+  --gs-diff-deleted-text: #EF4444;
+  --gs-diff-deleted-line-bg: #EF444420;
+  --gs-diff-deleted-word-bg: #EF444430;
 
-  /* Modified（蓝） */
-  --gs-diff-modified-bg: #1a2740;
-  --gs-diff-modified-text: #89b4fa;
-  --gs-diff-modified-line-bg: #1e3355;
-  --gs-diff-modified-word-bg: #2a4a7a;
+  /* Modified（橙） */
+  --gs-diff-modified-bg: #FF840015;
+  --gs-diff-modified-text: #FF8400;
+  --gs-diff-modified-line-bg: #FF840020;
+  --gs-diff-modified-word-bg: #FF840030;
 
   /* Diff 行号与分隔 */
-  --gs-diff-hunk-bg: #1a2740;
-  --gs-diff-hunk-text: #89b4fa;
-  --gs-diff-line-number: #6c7086;
-  --gs-diff-gutter-bg: #181825;
+  --gs-diff-hunk-bg: #0D1B2A;
+  --gs-diff-hunk-text: #4B5563;
+  --gs-diff-line-number: #4B5563;
+  --gs-diff-gutter-bg: #0A0A0A;
 
   /* ========== 阴影 ========== */
-  --gs-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --gs-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-  --gs-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  --gs-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --gs-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+  --gs-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+
+  /* ========== 表面色（Welcome 等面板） ========== */
+  --gs-surface-elevated: #111111;
+  --gs-border-subtle: #2A2A2A;
+  --gs-text-dim: #4B5563;
+
+  /* ========== 菜单 ========== */
+  --gs-menu-bg: #1A1A1A;
+  --gs-menu-border: #2E2E2E;
+  --gs-menu-hover-bg: #FF840018;
+  --gs-menu-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 
   /* ========== 滚动条 ========== */
-  --gs-scrollbar-track: #181825;
-  --gs-scrollbar-thumb: #383a5c;
-  --gs-scrollbar-thumb-hover: #4a4c72;
+  --gs-scrollbar-track: #0D0D0D;
+  --gs-scrollbar-thumb: #2A2A2A;
+  --gs-scrollbar-thumb-hover: #3A3A3A;
 }

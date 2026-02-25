@@ -1,13 +1,14 @@
 import { createContext, useContext } from 'solid-js';
-import { createStore } from 'solid-js/store';
+import { createPersistedStore } from '../utils/createPersisted';
 
 // ==================== 类型定义 ====================
 
-export type ActiveView = 'workspace' | 'history' | 'branches';
+export type ActiveView = 'workspace' | 'history' | 'branches' | 'pulls' | 'settings';
 
 export interface UiState {
   activeView: ActiveView;
   sidebarCollapsed: boolean;
+  lastRepoPath: string | null;
   selectedFile: string | null;
   detailPanelVisible: boolean;
 }
@@ -15,6 +16,7 @@ export interface UiState {
 export interface UiActions {
   setActiveView: (view: ActiveView) => void;
   toggleSidebar: () => void;
+  setLastRepoPath: (path: string | null) => void;
   selectFile: (path: string | null) => void;
   toggleDetailPanel: () => void;
   setDetailPanelVisible: (visible: boolean) => void;
@@ -27,6 +29,7 @@ export type UiStore = [UiState, UiActions];
 const initialState: UiState = {
   activeView: 'workspace',
   sidebarCollapsed: false,
+  lastRepoPath: null,
   selectedFile: null,
   detailPanelVisible: true,
 };
@@ -46,7 +49,11 @@ export function useUi(): UiStore {
 // ==================== Store 工厂函数 ====================
 
 export function createUiStore(): UiStore {
-  const [state, setState] = createStore<UiState>({ ...initialState });
+  const [state, setState] = createPersistedStore<UiState>(
+    'gitsage:ui',
+    initialState,
+    { pick: ['activeView', 'sidebarCollapsed', 'lastRepoPath'] },
+  );
 
   const actions: UiActions = {
     setActiveView(view: ActiveView) {
@@ -57,9 +64,12 @@ export function createUiStore(): UiStore {
       setState('sidebarCollapsed', (prev) => !prev);
     },
 
+    setLastRepoPath(path: string | null) {
+      setState('lastRepoPath', path);
+    },
+
     selectFile(path: string | null) {
       setState('selectedFile', path);
-      // 选中文件时自动显示详情面板
       if (path !== null) {
         setState('detailPanelVisible', true);
       }

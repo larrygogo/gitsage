@@ -103,7 +103,7 @@ const StatusBar: Component<StatusBarProps> = (props) => {
           </span>
         </Show>
         <Show when={ahead() === 0 && behind() === 0}>
-          <span><Check size={10} /> 已同步</span>
+          <span style={{ display: "inline-flex", "align-items": "center", gap: "4px" }}><Check size={10} /> 已同步</span>
         </Show>
       </div>
 
