@@ -45,6 +45,8 @@ const App: Component = () => {
   const [cloneDialogOpen, setCloneDialogOpen] = createSignal(false);
   /** 仓库选择器对话框 */
   const [repoPickerOpen, setRepoPickerOpen] = createSignal(false);
+  /** 仓库选择器：仅显示远程 */
+  const [repoPickerRemoteOnly, setRepoPickerRemoteOnly] = createSignal(false);
   /** 最近打开的仓库列表（菜单用） */
   const [recentRepos, setRecentRepos] = createSignal<RepoEntry[]>([]);
 
@@ -69,6 +71,9 @@ const App: Component = () => {
   // ==================== 启动时恢复上次仓库 ====================
 
   onMount(async () => {
+    // 禁用浏览器默认右键菜单
+    document.addEventListener("contextmenu", (e) => e.preventDefault());
+
     // 自动检测 GitHub 认证状态
     ghActions.checkAuth().catch((err) => {
       console.warn("[App] GitHub 认证检测失败:", err);
@@ -137,7 +142,8 @@ const App: Component = () => {
   };
 
   const handleCloneRepo = () => {
-    setCloneDialogOpen(true);
+    setRepoPickerRemoteOnly(true);
+    setRepoPickerOpen(true);
   };
 
   const handleCloneComplete = async (destPath: string) => {
@@ -274,6 +280,8 @@ const App: Component = () => {
         <div class={styles.toolbarArea}>
           <Toolbar
             menus={toolbarMenus()}
+            repoName={repoState.currentRepo?.name}
+            branchName={repoState.currentBranch || undefined}
           />
         </div>
 
@@ -347,7 +355,8 @@ const App: Component = () => {
       {/* 仓库选择器对话框 */}
       <RepoPickerDialog
         open={repoPickerOpen()}
-        onClose={() => setRepoPickerOpen(false)}
+        remoteOnly={repoPickerRemoteOnly()}
+        onClose={() => { setRepoPickerOpen(false); setRepoPickerRemoteOnly(false); }}
         onOpenRepo={handleOpenRepo}
         onCloneRepo={async (cloneUrl) => {
           setRepoPickerOpen(false);

@@ -1,0 +1,1380 @@
+/* ── PullsView ── */
+
+.pullsView {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ── Top Bar (48px) ── */
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  min-height: 48px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--gs-border-primary);
+}
+
+.topBarLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topBarTitle {
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gs-text-primary);
+}
+
+.topBarBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  padding: 0 8px;
+  background-color: #FF840020;
+  color: #FF8400;
+  border-radius: 11px;
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.topBarRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.newPrBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 14px;
+  background-color: #FF8400;
+  border: none;
+  border-radius: 8px;
+  color: #0A0A0A;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.newPrBtn:hover {
+  background-color: #FF6B00;
+}
+
+/* ── Tab Bar (40px) ── */
+
+.tabBar {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--gs-border-primary);
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 16px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.1s ease;
+}
+
+.tabText {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gs-text-muted);
+}
+
+.tabCount {
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+  font-size: 11px;
+  font-weight: normal;
+  color: var(--gs-text-muted);
+}
+
+.tab:hover .tabText {
+  color: var(--gs-text-primary);
+}
+
+.tabActive {
+  border-bottom-color: #FF8400;
+}
+
+.tabActive .tabText {
+  color: var(--gs-text-primary);
+}
+
+.tabActive .tabCount {
+  color: #FF8400;
+  font-weight: 600;
+}
+
+/* ── PR List ── */
+
+.prList {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* ── PR Row (80px) ── */
+
+.prRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 80px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--gs-border-primary);
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.prRow:hover {
+  background-color: var(--gs-accent-subtle);
+}
+
+.prRowActive {
+  background-color: #FF840008;
+}
+
+/* ── PR Status Icon ── */
+
+.prStatusIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 14px;
+  flex-shrink: 0;
+}
+
+.prStatusOpen {
+  background-color: #10B98118;
+  color: #10B981;
+}
+
+.prStatusClosed {
+  background-color: #EF444418;
+  color: #EF4444;
+}
+
+.prStatusMerged {
+  background-color: #8B5CF618;
+  color: #8B5CF6;
+}
+
+/* ── PR Info ── */
+
+.prInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.prTitle {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gs-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prRowActive .prTitle {
+  color: var(--gs-text-primary);
+}
+
+.prMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.prNumber {
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+  font-size: 11px;
+  font-weight: normal;
+  color: var(--gs-text-muted);
+}
+
+.prRowActive .prNumber {
+  color: #FF8400;
+  font-weight: 600;
+}
+
+.prAuthor {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 11px;
+  color: var(--gs-text-muted);
+}
+
+.prTime {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 11px;
+  color: var(--gs-text-muted);
+}
+
+.prBranch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 10px;
+  background-color: var(--gs-accent-subtle);
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+  font-size: 10px;
+  color: var(--gs-text-muted);
+}
+
+/* ── PR Right Column ── */
+
+.prRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.prChecks {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.prCheckDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.prCheckDotPassed {
+  background-color: #10B981;
+}
+
+.prCheckDotRunning {
+  background-color: #F59E0B;
+}
+
+.prCheckDotFailed {
+  background-color: #EF4444;
+}
+
+.prCheckText {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 10px;
+}
+
+.prCheckTextPassed {
+  color: #10B981;
+}
+
+.prCheckTextRunning {
+  color: #F59E0B;
+}
+
+.prCheckTextFailed {
+  color: #EF4444;
+}
+
+.prReviews {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 10px;
+  color: var(--gs-text-muted);
+}
+
+/* ── Content (list + detail split) ── */
+
+.content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── Empty / Loading / Auth ── */
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 1;
+  padding: 48px 24px;
+  color: var(--gs-text-muted);
+}
+
+.emptyIcon {
+  opacity: 0.5;
+}
+
+.emptyText {
+  font-size: 14px;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  color: var(--gs-text-muted);
+  font-size: 13px;
+}
+
+.authStatus {
+  font-size: 12px;
+  color: var(--gs-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.authDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.authDotConnected {
+  background-color: #10B981;
+}
+
+.authDotDisconnected {
+  background-color: #EF4444;
+}
+
+/* ── Left Panel (when detail is open) ── */
+
+.leftPanel {
+  display: flex;
+  flex-direction: column;
+  width: 380px;
+  min-width: 380px;
+  height: 100%;
+  border-right: 1px solid var(--gs-border-primary);
+  overflow: hidden;
+}
+
+/* ── Detail Panel ── */
+
+.detailPanel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ── Detail Header (fixed top) ── */
+
+.detailHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--gs-border-primary);
+  flex-shrink: 0;
+}
+
+.detailHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.detailMergeBtnSmall {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 6px;
+  background-color: #10B981;
+  border: none;
+  color: #FFFFFF;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.detailMergeBtnSmall:hover {
+  opacity: 0.9;
+}
+
+.detailCloseBtnSmall {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 6px;
+  background-color: var(--gs-surface-elevated, var(--gs-bg-secondary));
+  border: 1px solid var(--gs-border-primary);
+  color: var(--gs-text-dim, var(--gs-text-muted));
+  font-family: "Geist Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.detailCloseBtnSmall:hover {
+  border-color: var(--gs-text-muted);
+}
+
+/* ── Detail Body (scrollable) ── */
+
+.detailBody {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+/* ── Detail Tab Bar ── */
+
+.detailTabBar {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--gs-border-primary);
+  flex-shrink: 0;
+}
+
+.detailTab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 16px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.1s ease;
+}
+
+.detailTab:hover .tabText {
+  color: var(--gs-text-primary);
+}
+
+.detailTabActive {
+  border-bottom-color: #FF8400;
+}
+
+.detailTabActive .tabText {
+  color: var(--gs-text-primary);
+}
+
+.detailTabActive .tabCount {
+  color: #FF8400;
+  font-weight: 600;
+}
+
+.detailViewedProgress {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 10px;
+  color: #FF8400;
+  font-weight: 500;
+}
+
+/* ── Detail Tab Content ── */
+
+.detailTabContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 24px;
+}
+
+/* ── Detail Comments Section (Overview Tab) ── */
+
+.detailCommentsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detailCommentsEmpty {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 12px;
+  color: var(--gs-text-muted);
+}
+
+/* ── Viewed File ── */
+
+.diffFileViewed {
+  background-color: var(--gs-accent-subtle);
+}
+
+.diffFileNameViewed {
+  opacity: 0.5;
+}
+
+.diffFileViewedLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 8px;
+  background-color: #FF840018;
+  color: #FF8400;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.diffFileViewedCheck {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.diffFileViewedCheck input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: #FF8400;
+  cursor: pointer;
+}
+
+/* Detail Header (title row) */
+.detailTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.detailCloseIconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: none;
+  color: var(--gs-text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.12s, color 0.12s;
+}
+
+.detailCloseIconBtn:hover {
+  background-color: var(--gs-bg-tertiary);
+  color: var(--gs-text-primary);
+}
+
+.detailStatusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 12px;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.detailStatusBadgeOpen {
+  composes: detailStatusBadge;
+  background-color: #10B98118;
+  color: #10B981;
+}
+
+.detailStatusBadgeClosed {
+  composes: detailStatusBadge;
+  background-color: #EF444418;
+  color: #EF4444;
+}
+
+.detailStatusBadgeMerged {
+  composes: detailStatusBadge;
+  background-color: #8B5CF618;
+  color: #8B5CF6;
+}
+
+.detailStatusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.detailStatusDotOpen {
+  background-color: #10B981;
+}
+
+.detailStatusDotClosed {
+  background-color: #EF4444;
+}
+
+.detailStatusDotMerged {
+  background-color: #8B5CF6;
+}
+
+.detailTitle {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gs-text-primary);
+  line-height: 1.3;
+  min-width: 0;
+}
+
+.detailMetaRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.detailPrNum {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: #FF8400;
+}
+
+.detailSep {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 12px;
+  color: var(--gs-text-muted);
+}
+
+.detailAuthor {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 12px;
+  color: var(--gs-text-dim, var(--gs-text-muted));
+}
+
+.detailTime {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 12px;
+  color: var(--gs-text-muted);
+}
+
+.detailBranchBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 10px;
+  background-color: var(--gs-accent-subtle);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  color: var(--gs-text-dim, var(--gs-text-muted));
+}
+
+.detailArrowIcon {
+  color: var(--gs-text-muted);
+  flex-shrink: 0;
+}
+
+/* Divider */
+.detailDivider {
+  width: 100%;
+  height: 1px;
+  background-color: var(--gs-border-primary);
+  flex-shrink: 0;
+}
+
+/* Description */
+.detailDescSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detailDescLabel {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gs-text-primary);
+}
+
+.detailDescBody {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--gs-text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Info Grid (2 columns) */
+.detailInfoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.detailInfoColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detailInfoCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background-color: var(--gs-surface-elevated, var(--gs-bg-secondary));
+  border: 1px solid var(--gs-border-primary);
+}
+
+.detailInfoCardLabel {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--gs-text-dim, var(--gs-text-muted));
+}
+
+.detailInfoItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 12px;
+  color: var(--gs-text-secondary);
+}
+
+.detailInfoItemDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.detailLabel {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 10px;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.detailLabelsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Files Changed Card */
+.detailFileItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  color: var(--gs-text-secondary);
+  overflow: hidden;
+}
+
+.detailFileItemName {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detailFileItemBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 8px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.detailFileItemAdd {
+  composes: detailFileItemBadge;
+  background-color: #10B98118;
+  color: #10B981;
+}
+
+.detailFileItemDel {
+  composes: detailFileItemBadge;
+  background-color: #EF444418;
+  color: #EF4444;
+}
+
+.detailMoreFiles {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: #FF8400;
+  cursor: pointer;
+}
+
+/* Action Bar */
+.detailActionBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.detailMergeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 8px;
+  background-color: #10B981;
+  border: none;
+  color: #FFFFFF;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.detailMergeBtn:hover {
+  opacity: 0.9;
+}
+
+.detailCloseBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 8px;
+  background-color: var(--gs-surface-elevated, var(--gs-bg-secondary));
+  border: 1px solid var(--gs-border-primary);
+  color: var(--gs-text-dim, var(--gs-text-muted));
+  font-family: "Geist Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.detailCloseBtn:hover {
+  border-color: var(--gs-text-muted);
+}
+
+/* Detail Stats Row */
+.detailStatsRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 11px;
+  color: var(--gs-text-muted);
+}
+
+.detailStatAdd {
+  color: #10B981;
+  font-weight: 600;
+}
+
+.detailStatDel {
+  color: #EF4444;
+  font-weight: 600;
+}
+
+/* ── Detail Loading ── */
+
+.detailLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 100%;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 13px;
+  color: var(--gs-text-muted);
+}
+
+/* ── Diff Section ── */
+
+.diffSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.diffSectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gs-text-primary);
+}
+
+.diffSectionCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background-color: #FF840020;
+  color: #FF8400;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.diffFileBlock {
+  border: 1px solid var(--gs-border-primary);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.diffFileHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 12px;
+  background-color: var(--gs-surface-elevated, var(--gs-bg-secondary));
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.diffFileHeader:hover {
+  background-color: var(--gs-menu-hover-bg, var(--gs-accent-subtle));
+}
+
+.diffFileHeaderExpanded {
+  border-bottom: 1px solid var(--gs-border-primary);
+}
+
+.diffFileChevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--gs-text-muted);
+}
+
+.diffFileName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  color: var(--gs-text-secondary);
+}
+
+.diffFileStatus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+  background-color: #FF840018;
+  color: #FF8400;
+}
+
+.diffPatchContainer {
+  overflow-x: auto;
+  background-color: var(--gs-bg-primary);
+}
+
+.diffPatch {
+  margin: 0;
+  padding: 0;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  tab-size: 4;
+}
+
+.diffLineContext {
+  color: var(--gs-text-secondary);
+}
+
+.diffLineAdded {
+  background-color: var(--gs-diff-added-line-bg);
+  color: var(--gs-diff-added-text);
+}
+
+.diffLineDeleted {
+  background-color: var(--gs-diff-deleted-line-bg);
+  color: var(--gs-diff-deleted-text);
+}
+
+.diffLineHunk {
+  background-color: var(--gs-diff-hunk-bg);
+  color: var(--gs-diff-hunk-text);
+  font-style: italic;
+}
+
+.diffPatchEmpty {
+  padding: 16px;
+  text-align: center;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 12px;
+  color: var(--gs-text-muted);
+  background-color: var(--gs-bg-primary);
+}
+
+/* ── Inline Review ── */
+
+.diffLineRow {
+  display: flex;
+  align-items: stretch;
+  min-height: 22px;
+  position: relative;
+}
+
+.diffLineRow:hover .diffLineAddBtn {
+  visibility: visible;
+}
+
+.diffLineGutter {
+  display: flex;
+  align-items: center;
+  width: 70px;
+  min-width: 70px;
+  padding: 0 6px 0 0;
+  gap: 2px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  color: var(--gs-text-muted);
+  opacity: 0.6;
+  user-select: none;
+}
+
+.diffLineNum {
+  flex: 1;
+  text-align: right;
+}
+
+.diffLineAddBtn {
+  width: 20px;
+  min-width: 20px;
+  height: 16px;
+  border-radius: 4px;
+  border: none;
+  background-color: #FF8400;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.diffLineAddBtn:hover {
+  background-color: #FF6B00;
+}
+
+.diffLineContent {
+  flex: 1;
+  padding: 0 12px 0 8px;
+  white-space: pre;
+  min-width: 0;
+}
+
+.inlineCommentForm {
+  padding: 8px 12px 8px 70px;
+  background-color: var(--gs-surface-elevated, var(--gs-bg-secondary));
+  border-top: 1px solid var(--gs-border-primary);
+  border-bottom: 1px solid var(--gs-border-primary);
+}
+
+.inlineCommentTextarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 8px;
+  border: 1px solid var(--gs-border-primary);
+  border-radius: 6px;
+  background-color: var(--gs-bg-primary);
+  color: var(--gs-text-primary);
+  font-family: "Geist Sans", sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.inlineCommentTextarea:focus {
+  border-color: #FF8400;
+}
+
+.inlineCommentActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.inlineCommentActions button {
+  height: 26px;
+  padding: 0 12px;
+  border-radius: 6px;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.inlineCommentActions button:first-child {
+  background: none;
+  color: var(--gs-text-muted);
+  border: 1px solid var(--gs-border-primary);
+}
+
+.inlineCommentActions button:first-child:hover {
+  border-color: var(--gs-text-muted);
+}
+
+.inlineCommentActions button:last-child {
+  background-color: #FF8400;
+  color: #0A0A0A;
+}
+
+.inlineCommentActions button:last-child:hover {
+  background-color: #FF6B00;
+}
+
+.existingComment {
+  padding: 8px 12px 8px 70px;
+  background-color: var(--gs-surface-elevated, var(--gs-bg-secondary));
+  border-top: 1px solid var(--gs-border-primary);
+}
+
+.existingCommentHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.existingCommentAvatar {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+}
+
+.existingCommentUser {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gs-text-primary);
+}
+
+.existingCommentTime {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 10px;
+  color: var(--gs-text-muted);
+}
+
+.existingCommentBody {
+  font-family: "Geist Sans", sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--gs-text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.pendingComment {
+  padding: 8px 12px 8px 70px;
+  background-color: #FF840008;
+  border-top: 1px dashed #FF840040;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.pendingCommentBody {
+  flex: 1;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--gs-text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.pendingCommentBadge {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 8px;
+  background-color: #FF840020;
+  color: #FF8400;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.pendingCommentRemove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: none;
+  background: none;
+  color: var(--gs-text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.pendingCommentRemove:hover {
+  background-color: var(--gs-bg-tertiary);
+  color: #EF4444;
+}
+
+.pendingReviewBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background-color: var(--gs-surface-elevated, var(--gs-bg-secondary));
+  border: 1px solid #FF840040;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.pendingReviewBarLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 12px;
+  color: var(--gs-text-secondary);
+}
+
+.pendingReviewBarRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pendingReviewBarRight button {
+  height: 30px;
+  padding: 0 14px;
+  border-radius: 6px;
+  font-family: "Geist Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.discardBtn {
+  background: none;
+  color: var(--gs-text-muted);
+  border: 1px solid var(--gs-border-primary) !important;
+}
+
+.discardBtn:hover {
+  border-color: #EF4444 !important;
+  color: #EF4444;
+}
+
+.submitReviewBtn {
+  background-color: #FF8400;
+  color: #0A0A0A;
+}
+
+.submitReviewBtn:hover {
+  background-color: #FF6B00;
+}
+
+/* ── Scrollbar ── */
+
+.prList::-webkit-scrollbar,
+.detailBody::-webkit-scrollbar {
+  width: 4px;
+}
+
+.prList::-webkit-scrollbar-track,
+.detailBody::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.prList::-webkit-scrollbar-thumb,
+.detailBody::-webkit-scrollbar-thumb {
+  background-color: var(--gs-scrollbar-thumb);
+  border-radius: 4px;
+}
+
+.prList::-webkit-scrollbar-thumb:hover,
+.detailBody::-webkit-scrollbar-thumb:hover {
+  background-color: var(--gs-scrollbar-thumb-hover);
+}

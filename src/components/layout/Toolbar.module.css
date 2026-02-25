@@ -1,113 +1,303 @@
-/* ── Toolbar ── */
+/* ── Toolbar (Custom Title Bar) ── */
 
 .toolbar {
   display: flex;
   align-items: center;
-  height: 40px;
-  min-height: 40px;
+  height: 36px;
+  min-height: 36px;
   padding: 0 12px;
   background-color: var(--gs-bg-secondary);
-  border-bottom: 1px solid var(--gs-border-secondary);
-  gap: 12px;
+  border-bottom: 1px solid var(--gs-border-primary);
   user-select: none;
 }
 
-/* ── Repo info ── */
+/* ── Left section: Logo + Divider + Menus ── */
+
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.appLogo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #FF8400, #FF6B00);
+  color: #0A0A0A;
+  flex-shrink: 0;
+}
+
+.appName {
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gs-text-primary);
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* ── Vertical divider between logo area and menus ── */
+
+.menuDivider {
+  display: block;
+  width: 1px;
+  height: 16px;
+  background-color: var(--gs-border-primary);
+  flex-shrink: 0;
+}
+
+/* ── Menu bar ── */
+
+.menuBar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.menuGroup {
+  position: relative;
+}
+
+.menuTrigger {
+  height: 28px;
+  padding: 0 10px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: var(--gs-text-muted);
+  font-family: "Geist Sans", sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.1s ease, color 0.1s ease;
+}
+
+.menuTrigger:hover,
+.menuTriggerActive {
+  background-color: var(--gs-bg-tertiary);
+  color: var(--gs-text-primary);
+}
+
+/* ── Menu dropdown ── */
+
+.menuDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 2px;
+  width: 220px;
+  padding: 4px 0;
+  background-color: var(--gs-menu-bg);
+  border: 1px solid var(--gs-menu-border);
+  border-radius: 8px;
+  box-shadow: var(--gs-menu-shadow);
+  z-index: 100;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  width: calc(100% - 8px);
+  height: 28px;
+  margin: 0 4px;
+  padding: 0 8px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: var(--gs-text-secondary);
+  font-family: "Geist Sans", sans-serif;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+  gap: 8px;
+}
+
+.menuItem:hover {
+  background-color: var(--gs-menu-hover-bg);
+  color: var(--gs-text-primary);
+  font-weight: 500;
+}
+
+.menuItem:hover .menuItemIcon {
+  color: var(--gs-accent-primary);
+}
+
+.menuItemIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--gs-text-muted);
+  transition: color 0.12s ease;
+}
+
+.menuItemLabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menuItemShortcut {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  color: var(--gs-text-dim);
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* Danger item (e.g. delete, discard) */
+.menuItemDanger {
+  color: var(--gs-error-solid);
+}
+
+.menuItemDanger .menuItemIcon {
+  color: var(--gs-error-solid);
+}
+
+.menuItemDanger:hover {
+  background-color: var(--gs-error-bg);
+  color: var(--gs-error-solid);
+}
+
+.menuItemDanger:hover .menuItemIcon {
+  color: var(--gs-error-solid);
+}
+
+/* Disabled item */
+.menuItemDisabled {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ── Submenu ── */
+
+.submenuWrapper {
+  position: relative;
+}
+
+.submenuWrapper:hover > .submenuDropdown {
+  display: block;
+}
+
+.submenuArrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--gs-text-dim);
+}
+
+.submenuDropdown {
+  display: none;
+  position: absolute;
+  top: -4px;
+  left: 100%;
+  margin-left: 2px;
+  width: 240px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 4px 0;
+  background-color: var(--gs-menu-bg);
+  border: 1px solid var(--gs-menu-border);
+  border-radius: 8px;
+  box-shadow: var(--gs-menu-shadow);
+  z-index: 101;
+}
+
+.menuSeparator {
+  height: 1px;
+  margin: 4px 8px;
+  background-color: var(--gs-menu-border);
+}
+
+/* ── Drag region (center) ── */
+
+.dragRegion {
+  flex: 1;
+  height: 100%;
+  min-width: 0;
+  cursor: default;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Repo info (center of toolbar) ── */
 
 .repoInfo {
   display: flex;
   align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.repoName {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--gs-text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.separator {
-  color: var(--gs-text-muted);
-  font-size: 13px;
-}
-
-.branchBadge {
-  display: inline-flex;
-  align-items: center;
   gap: 4px;
-  padding: 2px 8px;
-  background-color: var(--gs-accent-subtle);
-  color: var(--gs-accent-primary);
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  white-space: nowrap;
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  pointer-events: none;
 }
 
-.branchIcon {
-  font-size: 12px;
+.repoInfoName {
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gs-text-secondary);
+}
+
+.repoInfoSep {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  color: var(--gs-text-dim, var(--gs-text-muted));
+  opacity: 0.5;
+}
+
+.repoInfoBranchIcon {
+  color: #FF8400;
   flex-shrink: 0;
 }
 
-/* ── Spacer ── */
-
-.spacer {
-  flex: 1;
+.repoInfoBranch {
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: #FF8400;
 }
 
-/* ── Sync actions ── */
+/* ── Window controls ── */
 
-.syncActions {
+.windowControls {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
-.syncBtn {
+.windowBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  width: 28px;
   height: 28px;
-  padding: 0 8px;
   background: none;
-  border: 1px solid transparent;
+  border: none;
   border-radius: 4px;
-  color: var(--gs-text-secondary);
-  font-size: 12px;
+  color: var(--gs-text-muted);
   cursor: pointer;
-  white-space: nowrap;
-  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition: background-color 0.1s ease, color 0.1s ease;
 }
 
-.syncBtn:hover {
-  background-color: var(--gs-accent-subtle);
+.windowBtn:hover {
+  background-color: var(--gs-bg-tertiary);
   color: var(--gs-text-primary);
-  border-color: var(--gs-border-secondary);
 }
 
-.syncBtn:active {
-  background-color: var(--gs-accent-subtle);
-  color: var(--gs-accent-primary);
-}
-
-.syncBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.syncIcon {
-  font-size: 14px;
-  flex-shrink: 0;
-}
-
-.syncLabel {
-  font-size: 12px;
+.windowBtnClose:hover {
+  background-color: #e81123;
+  color: #ffffff;
 }
