@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/nicegui-project/nicegui/refs/heads/main/nicegui/node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "GitSage",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "identifier": "com.gitsage.app",
   "build": {
     "beforeDevCommand": "npm run dev",
