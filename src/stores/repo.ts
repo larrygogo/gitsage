@@ -1,10 +1,14 @@
-import { createContext, useContext } from 'solid-js';
-import { createStore, produce } from 'solid-js/store';
+import { createContext, useContext } from "solid-js";
+import { createStore, produce } from "solid-js/store";
 import type {
-  FileStatus, BranchInfo, StashEntry, RepoOperationState,
-  TagInfo, RemoteInfo,
-} from '../types';
-import * as gitService from '../services/git';
+  FileStatus,
+  BranchInfo,
+  StashEntry,
+  RepoOperationState,
+  TagInfo,
+  RemoteInfo,
+} from "../types";
+import * as gitService from "../services/git";
 
 // ==================== 类型定义 ====================
 
@@ -25,7 +29,6 @@ export interface RepoState {
 }
 
 export interface RepoActions {
-  // 仓库管理
   openRepo: (path: string) => Promise<void>;
   closeRepo: () => Promise<void>;
   refreshStatus: () => Promise<void>;
@@ -35,22 +38,18 @@ export interface RepoActions {
   refreshTags: () => Promise<void>;
   refreshRemotes: () => Promise<void>;
   refreshAll: () => Promise<void>;
-  // 文件操作
   stageFiles: (paths: string[]) => Promise<void>;
   unstageFiles: (paths: string[]) => Promise<void>;
   discardChanges: (paths: string[]) => Promise<void>;
   discardAllChanges: () => Promise<void>;
-  // 提交
   createCommit: (message: string, amend?: boolean) => Promise<string>;
   amendCommit: (message: string) => Promise<string>;
   undoLastCommit: (soft?: boolean) => Promise<void>;
   resetToCommit: (commitId: string, mode: string) => Promise<void>;
-  // 分支
   createBranch: (name: string) => Promise<void>;
   checkoutBranch: (name: string) => Promise<void>;
   deleteBranch: (name: string) => Promise<void>;
   renameBranch: (oldName: string, newName: string) => Promise<void>;
-  // 远程
   fetchRemote: (remote?: string) => Promise<void>;
   pullRemote: (remote?: string, branch?: string) => Promise<void>;
   pushRemote: (remote?: string, branch?: string) => Promise<void>;
@@ -59,13 +58,11 @@ export interface RepoActions {
   addRemote: (name: string, url: string) => Promise<void>;
   removeRemote: (name: string) => Promise<void>;
   renameRemote: (oldName: string, newName: string) => Promise<void>;
-  // Stash
   stashSave: (message?: string, includeUntracked?: boolean) => Promise<void>;
   stashPop: (index?: number) => Promise<void>;
   stashApply: (index?: number) => Promise<void>;
   stashDrop: (index?: number) => Promise<void>;
   stashClear: () => Promise<void>;
-  // Merge / Cherry-pick / Revert / Rebase
   mergeBranch: (branch: string, noFf?: boolean) => Promise<void>;
   mergeAbort: () => Promise<void>;
   mergeContinue: () => Promise<void>;
@@ -79,10 +76,8 @@ export interface RepoActions {
   rebaseAbort: () => Promise<void>;
   rebaseContinue: () => Promise<void>;
   rebaseSkip: () => Promise<void>;
-  // Tag
   createTag: (name: string, message?: string, commit?: string) => Promise<void>;
   deleteTag: (name: string) => Promise<void>;
-  // 错误
   clearError: () => void;
 }
 
@@ -93,10 +88,10 @@ export type RepoStore = [RepoState, RepoActions];
 const initialState: RepoState = {
   currentRepo: null,
   fileStatuses: [],
-  currentBranch: '',
+  currentBranch: "",
   branches: [],
   stashes: [],
-  repoState: 'Normal',
+  repoState: "Normal",
   tags: [],
   remotes: [],
   isLoading: false,
@@ -110,7 +105,7 @@ export const RepoContext = createContext<RepoStore>();
 export function useRepo(): RepoStore {
   const context = useContext(RepoContext);
   if (!context) {
-    throw new Error('useRepo 必须在 RepoProvider 内部使用');
+    throw new Error("useRepo 必须在 RepoProvider 内部使用");
   }
   return context;
 }
@@ -120,100 +115,131 @@ export function useRepo(): RepoStore {
 export function createRepoStore(): RepoStore {
   const [state, setState] = createStore<RepoState>({ ...initialState });
 
+  /** 通用操作包装器：捕获异常并设置 error 状态 */
+  async function wrapAction<T>(
+    fn: () => Promise<T>,
+    opts?: { loading?: boolean; rethrow?: boolean },
+  ): Promise<T> {
+    const { loading = false, rethrow = true } = opts ?? {};
+    if (loading) setState("isLoading", true);
+    try {
+      return await fn();
+    } catch (error) {
+      setState("error", error instanceof Error ? error.message : String(error));
+      if (rethrow) throw error;
+      return undefined as T;
+    } finally {
+      if (loading) setState("isLoading", false);
+    }
+  }
+
+  /** 执行操作后刷新指定数据 */
+  async function actionThenRefresh(
+    fn: () => Promise<unknown>,
+    refreshes: Array<() => Promise<void>>,
+    opts?: { loading?: boolean },
+  ): Promise<void> {
+    await wrapAction(async () => {
+      await fn();
+      await Promise.all(refreshes.map((r) => r()));
+    }, opts);
+  }
+
   const actions: RepoActions = {
     // ==================== 仓库管理 ====================
 
     async openRepo(path: string) {
-      setState('isLoading', true);
-      setState('error', null);
-      try {
-        const repoName = await gitService.openRepo(path);
-        setState('currentRepo', { name: repoName, path });
-        await actions.refreshAll();
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      } finally {
-        setState('isLoading', false);
-      }
+      await wrapAction(
+        async () => {
+          const repoName = await gitService.openRepo(path);
+          setState("currentRepo", { name: repoName, path });
+          await actions.refreshAll();
+        },
+        { loading: true },
+      );
     },
 
     async closeRepo() {
-      try {
+      await wrapAction(async () => {
         await gitService.closeRepo();
-        setState(produce((s) => {
-          s.currentRepo = null;
-          s.fileStatuses = [];
-          s.currentBranch = '';
-          s.branches = [];
-          s.stashes = [];
-          s.repoState = 'Normal';
-          s.tags = [];
-          s.remotes = [];
-          s.error = null;
-        }));
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
+        setState(
+          produce((s) => {
+            s.currentRepo = null;
+            s.fileStatuses = [];
+            s.currentBranch = "";
+            s.branches = [];
+            s.stashes = [];
+            s.repoState = "Normal";
+            s.tags = [];
+            s.remotes = [];
+            s.error = null;
+          }),
+        );
+      });
     },
 
     async refreshStatus() {
-      try {
-        const statuses = await gitService.getStatus();
-        setState('fileStatuses', statuses);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-      }
+      await wrapAction(
+        async () => {
+          const statuses = await gitService.getStatus();
+          setState("fileStatuses", statuses);
+        },
+        { rethrow: false },
+      );
     },
 
     async refreshBranches() {
-      try {
-        const [branches, currentBranch] = await Promise.all([
-          gitService.getBranches(),
-          gitService.getCurrentBranch(),
-        ]);
-        setState('branches', branches);
-        setState('currentBranch', currentBranch);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-      }
+      await wrapAction(
+        async () => {
+          const [branches, currentBranch] = await Promise.all([
+            gitService.getBranches(),
+            gitService.getCurrentBranch(),
+          ]);
+          setState("branches", branches);
+          setState("currentBranch", currentBranch);
+        },
+        { rethrow: false },
+      );
     },
 
     async refreshStashes() {
-      try {
-        const stashes = await gitService.stashList();
-        setState('stashes', stashes);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-      }
+      await wrapAction(
+        async () => {
+          const stashes = await gitService.stashList();
+          setState("stashes", stashes);
+        },
+        { rethrow: false },
+      );
     },
 
     async refreshRepoState() {
-      try {
-        const repoState = await gitService.getRepoState();
-        setState('repoState', repoState);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-      }
+      await wrapAction(
+        async () => {
+          const repoState = await gitService.getRepoState();
+          setState("repoState", repoState);
+        },
+        { rethrow: false },
+      );
     },
 
     async refreshTags() {
-      try {
-        const tags = await gitService.getTags();
-        setState('tags', tags);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-      }
+      await wrapAction(
+        async () => {
+          const tags = await gitService.getTags();
+          setState("tags", tags);
+        },
+        { rethrow: false },
+      );
     },
 
     async refreshRemotes() {
-      try {
-        const remotes = await gitService.getRemotes();
-        setState('remotes', remotes);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-      }
+      await wrapAction(
+        async () => {
+          const remotes = await gitService.getRemotes();
+          setState("remotes", remotes);
+        },
+        { rethrow: false },
+      );
     },
 
     async refreshAll() {
@@ -229,454 +255,223 @@ export function createRepoStore(): RepoStore {
 
     // ==================== 文件操作 ====================
 
-    async stageFiles(paths: string[]) {
-      try {
-        await gitService.stageFiles(paths);
-        await actions.refreshStatus();
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    stageFiles: (paths) =>
+      actionThenRefresh(() => gitService.stageFiles(paths), [actions.refreshStatus]),
 
-    async unstageFiles(paths: string[]) {
-      try {
-        await gitService.unstageFiles(paths);
-        await actions.refreshStatus();
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    unstageFiles: (paths) =>
+      actionThenRefresh(() => gitService.unstageFiles(paths), [actions.refreshStatus]),
 
-    async discardChanges(paths: string[]) {
-      try {
-        await gitService.discardChanges(paths);
-        await actions.refreshStatus();
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    discardChanges: (paths) =>
+      actionThenRefresh(() => gitService.discardChanges(paths), [actions.refreshStatus]),
 
-    async discardAllChanges() {
-      try {
-        await gitService.discardAllChanges();
-        await actions.refreshStatus();
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    discardAllChanges: () =>
+      actionThenRefresh(() => gitService.discardAllChanges(), [actions.refreshStatus]),
 
     // ==================== 提交 ====================
 
-    async createCommit(message: string, amend?: boolean) {
-      try {
+    async createCommit(message, amend) {
+      return wrapAction(async () => {
         const commitId = await gitService.createCommit(message, amend);
         await actions.refreshStatus();
         return commitId;
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
+      });
     },
 
-    async amendCommit(message: string) {
-      try {
+    async amendCommit(message) {
+      return wrapAction(async () => {
         const commitId = await gitService.amendCommit(message);
         await actions.refreshStatus();
         return commitId;
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
+      });
     },
 
-    async undoLastCommit(soft?: boolean) {
-      try {
-        await gitService.undoLastCommit(soft ?? true);
-        await actions.refreshStatus();
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    undoLastCommit: (soft) =>
+      actionThenRefresh(() => gitService.undoLastCommit(soft ?? true), [actions.refreshStatus]),
 
-    async resetToCommit(commitId: string, mode: string) {
-      try {
-        await gitService.resetToCommit(commitId, mode);
-        await Promise.all([actions.refreshStatus(), actions.refreshBranches()]);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    resetToCommit: (commitId, mode) =>
+      actionThenRefresh(
+        () => gitService.resetToCommit(commitId, mode),
+        [actions.refreshStatus, actions.refreshBranches],
+      ),
 
     // ==================== 分支 ====================
 
-    async createBranch(name: string) {
-      try {
-        await gitService.createBranch(name);
-        await actions.refreshBranches();
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    createBranch: (name) =>
+      actionThenRefresh(() => gitService.createBranch(name), [actions.refreshBranches]),
 
-    async checkoutBranch(name: string) {
-      try {
-        await gitService.checkoutBranch(name);
-        await Promise.all([
-          actions.refreshStatus(),
-          actions.refreshBranches(),
-        ]);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    checkoutBranch: (name) =>
+      actionThenRefresh(
+        () => gitService.checkoutBranch(name),
+        [actions.refreshStatus, actions.refreshBranches],
+      ),
 
-    async deleteBranch(name: string) {
-      try {
-        await gitService.deleteBranch(name);
-        await actions.refreshBranches();
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    deleteBranch: (name) =>
+      actionThenRefresh(() => gitService.deleteBranch(name), [actions.refreshBranches]),
 
-    async renameBranch(oldName: string, newName: string) {
-      try {
-        await gitService.renameBranch(oldName, newName);
-        await actions.refreshBranches();
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    renameBranch: (oldName, newName) =>
+      actionThenRefresh(() => gitService.renameBranch(oldName, newName), [actions.refreshBranches]),
 
     // ==================== 远程 ====================
 
-    async fetchRemote(remote?: string) {
-      setState('isLoading', true);
-      try {
-        await gitService.fetchRemote(remote);
-        await actions.refreshBranches();
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      } finally {
-        setState('isLoading', false);
-      }
-    },
+    fetchRemote: (remote) =>
+      actionThenRefresh(() => gitService.fetchRemote(remote), [actions.refreshBranches], {
+        loading: true,
+      }),
 
-    async pullRemote(remote?: string, branch?: string) {
-      setState('isLoading', true);
-      try {
-        await gitService.pullRemote(remote, branch);
-        await Promise.all([
-          actions.refreshStatus(),
-          actions.refreshBranches(),
-          actions.refreshRepoState(),
-        ]);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      } finally {
-        setState('isLoading', false);
-      }
-    },
+    pullRemote: (remote, branch) =>
+      actionThenRefresh(
+        () => gitService.pullRemote(remote, branch),
+        [actions.refreshStatus, actions.refreshBranches, actions.refreshRepoState],
+        { loading: true },
+      ),
 
-    async pushRemote(remote?: string, branch?: string) {
-      setState('isLoading', true);
-      try {
-        await gitService.pushRemote(remote, branch);
-        await actions.refreshBranches();
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      } finally {
-        setState('isLoading', false);
-      }
-    },
+    pushRemote: (remote, branch) =>
+      actionThenRefresh(() => gitService.pushRemote(remote, branch), [actions.refreshBranches], {
+        loading: true,
+      }),
 
-    async pullRebase(remote?: string, branch?: string) {
-      setState('isLoading', true);
-      try {
-        await gitService.pullRebase(remote, branch);
-        await Promise.all([
-          actions.refreshStatus(),
-          actions.refreshBranches(),
-          actions.refreshRepoState(),
-        ]);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      } finally {
-        setState('isLoading', false);
-      }
-    },
+    pullRebase: (remote, branch) =>
+      actionThenRefresh(
+        () => gitService.pullRebase(remote, branch),
+        [actions.refreshStatus, actions.refreshBranches, actions.refreshRepoState],
+        { loading: true },
+      ),
 
-    async syncRemote(remote?: string, branch?: string) {
-      setState('isLoading', true);
-      try {
-        await gitService.syncRemote(remote, branch);
-        await actions.refreshBranches();
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      } finally {
-        setState('isLoading', false);
-      }
-    },
+    syncRemote: (remote, branch) =>
+      actionThenRefresh(() => gitService.syncRemote(remote, branch), [actions.refreshBranches], {
+        loading: true,
+      }),
 
-    async addRemote(name: string, url: string) {
-      try {
-        await gitService.addRemote(name, url);
-        await actions.refreshRemotes();
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    addRemote: (name, url) =>
+      actionThenRefresh(() => gitService.addRemote(name, url), [actions.refreshRemotes]),
 
-    async removeRemote(name: string) {
-      try {
-        await gitService.removeRemote(name);
-        await actions.refreshRemotes();
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    removeRemote: (name) =>
+      actionThenRefresh(() => gitService.removeRemote(name), [actions.refreshRemotes]),
 
-    async renameRemote(oldName: string, newName: string) {
-      try {
-        await gitService.renameRemote(oldName, newName);
-        await actions.refreshRemotes();
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    renameRemote: (oldName, newName) =>
+      actionThenRefresh(() => gitService.renameRemote(oldName, newName), [actions.refreshRemotes]),
 
     // ==================== Stash ====================
 
-    async stashSave(message?: string, includeUntracked?: boolean) {
-      try {
-        await gitService.stashSave(message, includeUntracked);
-        await Promise.all([actions.refreshStatus(), actions.refreshStashes()]);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    stashSave: (message, includeUntracked) =>
+      actionThenRefresh(
+        () => gitService.stashSave(message, includeUntracked),
+        [actions.refreshStatus, actions.refreshStashes],
+      ),
 
-    async stashPop(index?: number) {
-      try {
-        await gitService.stashPop(index);
-        await Promise.all([actions.refreshStatus(), actions.refreshStashes()]);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    stashPop: (index) =>
+      actionThenRefresh(
+        () => gitService.stashPop(index),
+        [actions.refreshStatus, actions.refreshStashes],
+      ),
 
-    async stashApply(index?: number) {
-      try {
-        await gitService.stashApply(index);
-        await Promise.all([actions.refreshStatus(), actions.refreshStashes()]);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    stashApply: (index) =>
+      actionThenRefresh(
+        () => gitService.stashApply(index),
+        [actions.refreshStatus, actions.refreshStashes],
+      ),
 
-    async stashDrop(index?: number) {
-      try {
-        await gitService.stashDrop(index);
-        await actions.refreshStashes();
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    stashDrop: (index) =>
+      actionThenRefresh(() => gitService.stashDrop(index), [actions.refreshStashes]),
 
     async stashClear() {
-      try {
+      await wrapAction(async () => {
         await gitService.stashClear();
-        setState('stashes', []);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
+        setState("stashes", []);
+      });
     },
 
     // ==================== Merge / Cherry-pick / Revert / Rebase ====================
 
-    async mergeBranch(branch: string, noFf?: boolean) {
-      try {
-        await gitService.mergeBranch(branch, noFf);
-        await Promise.all([
-          actions.refreshStatus(),
-          actions.refreshBranches(),
-          actions.refreshRepoState(),
-        ]);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    mergeBranch: (branch, noFf) =>
+      actionThenRefresh(
+        () => gitService.mergeBranch(branch, noFf),
+        [actions.refreshStatus, actions.refreshBranches, actions.refreshRepoState],
+      ),
 
-    async mergeAbort() {
-      try {
-        await gitService.mergeAbort();
-        await Promise.all([actions.refreshStatus(), actions.refreshRepoState()]);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    mergeAbort: () =>
+      actionThenRefresh(
+        () => gitService.mergeAbort(),
+        [actions.refreshStatus, actions.refreshRepoState],
+      ),
 
-    async mergeContinue() {
-      try {
-        await gitService.mergeContinue();
-        await Promise.all([actions.refreshStatus(), actions.refreshRepoState()]);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    mergeContinue: () =>
+      actionThenRefresh(
+        () => gitService.mergeContinue(),
+        [actions.refreshStatus, actions.refreshRepoState],
+      ),
 
-    async cherryPick(commitId: string) {
-      try {
-        await gitService.cherryPick(commitId);
-        await Promise.all([actions.refreshStatus(), actions.refreshRepoState()]);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    cherryPick: (commitId) =>
+      actionThenRefresh(
+        () => gitService.cherryPick(commitId),
+        [actions.refreshStatus, actions.refreshRepoState],
+      ),
 
-    async cherryPickAbort() {
-      try {
-        await gitService.cherryPickAbort();
-        await Promise.all([actions.refreshStatus(), actions.refreshRepoState()]);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    cherryPickAbort: () =>
+      actionThenRefresh(
+        () => gitService.cherryPickAbort(),
+        [actions.refreshStatus, actions.refreshRepoState],
+      ),
 
-    async cherryPickContinue() {
-      try {
-        await gitService.cherryPickContinue();
-        await Promise.all([actions.refreshStatus(), actions.refreshRepoState()]);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    cherryPickContinue: () =>
+      actionThenRefresh(
+        () => gitService.cherryPickContinue(),
+        [actions.refreshStatus, actions.refreshRepoState],
+      ),
 
-    async revertCommit(commitId: string) {
-      try {
-        await gitService.revertCommit(commitId);
-        await Promise.all([actions.refreshStatus(), actions.refreshRepoState()]);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    revertCommit: (commitId) =>
+      actionThenRefresh(
+        () => gitService.revertCommit(commitId),
+        [actions.refreshStatus, actions.refreshRepoState],
+      ),
 
-    async revertAbort() {
-      try {
-        await gitService.revertAbort();
-        await Promise.all([actions.refreshStatus(), actions.refreshRepoState()]);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    revertAbort: () =>
+      actionThenRefresh(
+        () => gitService.revertAbort(),
+        [actions.refreshStatus, actions.refreshRepoState],
+      ),
 
-    async revertContinue() {
-      try {
-        await gitService.revertContinue();
-        await Promise.all([actions.refreshStatus(), actions.refreshRepoState()]);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    revertContinue: () =>
+      actionThenRefresh(
+        () => gitService.revertContinue(),
+        [actions.refreshStatus, actions.refreshRepoState],
+      ),
 
-    async rebaseOnto(onto: string) {
-      try {
-        await gitService.rebaseOnto(onto);
-        await Promise.all([actions.refreshStatus(), actions.refreshRepoState()]);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    rebaseOnto: (onto) =>
+      actionThenRefresh(
+        () => gitService.rebaseOnto(onto),
+        [actions.refreshStatus, actions.refreshRepoState],
+      ),
 
-    async rebaseAbort() {
-      try {
-        await gitService.rebaseAbort();
-        await Promise.all([actions.refreshStatus(), actions.refreshRepoState()]);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    rebaseAbort: () =>
+      actionThenRefresh(
+        () => gitService.rebaseAbort(),
+        [actions.refreshStatus, actions.refreshRepoState],
+      ),
 
-    async rebaseContinue() {
-      try {
-        await gitService.rebaseContinue();
-        await Promise.all([actions.refreshStatus(), actions.refreshRepoState()]);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    rebaseContinue: () =>
+      actionThenRefresh(
+        () => gitService.rebaseContinue(),
+        [actions.refreshStatus, actions.refreshRepoState],
+      ),
 
-    async rebaseSkip() {
-      try {
-        await gitService.rebaseSkip();
-        await Promise.all([actions.refreshStatus(), actions.refreshRepoState()]);
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    rebaseSkip: () =>
+      actionThenRefresh(
+        () => gitService.rebaseSkip(),
+        [actions.refreshStatus, actions.refreshRepoState],
+      ),
 
     // ==================== Tag ====================
 
-    async createTag(name: string, message?: string, commit?: string) {
-      try {
-        await gitService.createTag(name, message, commit);
-        await actions.refreshTags();
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    createTag: (name, message, commit) =>
+      actionThenRefresh(() => gitService.createTag(name, message, commit), [actions.refreshTags]),
 
-    async deleteTag(name: string) {
-      try {
-        await gitService.deleteTag(name);
-        await actions.refreshTags();
-      } catch (error) {
-        setState('error', error instanceof Error ? error.message : String(error));
-        throw error;
-      }
-    },
+    deleteTag: (name) => actionThenRefresh(() => gitService.deleteTag(name), [actions.refreshTags]),
 
     // ==================== 错误 ====================
 
     clearError() {
-      setState('error', null);
+      setState("error", null);
     },
   };
 

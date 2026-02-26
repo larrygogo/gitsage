@@ -403,7 +403,7 @@ impl LibGitOps {
 
             // Try to peel to a tag object (annotated tag)
             let resolved = reference.resolve()?;
-            let target_oid = resolved.target().unwrap_or_else(|| git2::Oid::zero());
+            let target_oid = resolved.target().unwrap_or_else(git2::Oid::zero);
 
             match reference.peel(git2::ObjectType::Tag) {
                 Ok(tag_obj) => {

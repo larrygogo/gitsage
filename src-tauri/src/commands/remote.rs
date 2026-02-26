@@ -42,7 +42,7 @@ pub async fn push_remote(
 pub async fn get_remotes(state: State<'_, AppState>) -> Result<Vec<RemoteInfo>, AppError> {
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.remotes()
+    repo.remotes().await
 }
 
 #[tauri::command]

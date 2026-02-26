@@ -1,9 +1,10 @@
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 use serde::Serialize;
 
-use crate::error::AppResult;
+use crate::error::{AppError, AppResult};
 use crate::git::diff::DiffOutput;
 use crate::git::libgit::LibGitOps;
 
@@ -163,10 +164,11 @@ pub struct WorktreeInfo {
 
 // ==================== GitRepository ====================
 
-/// Repository wrapper combining git2 (read) and CLI (write) operations
+/// Repository wrapper combining git2 (read) and CLI (write) operations.
+/// Read operations run via `spawn_blocking` to avoid blocking the Tokio runtime.
 pub struct GitRepository {
     pub path: PathBuf,
-    pub libgit: LibGitOps,
+    libgit: Arc<LibGitOps>,
 }
 
 impl GitRepository {
@@ -175,7 +177,7 @@ impl GitRepository {
         let libgit = LibGitOps::open(path)?;
         Ok(Self {
             path: path.to_path_buf(),
-            libgit,
+            libgit: Arc::new(libgit),
         })
     }
 
@@ -184,7 +186,7 @@ impl GitRepository {
         let libgit = LibGitOps::init(path)?;
         Ok(Self {
             path: path.to_path_buf(),
-            libgit,
+            libgit: Arc::new(libgit),
         })
     }
 
@@ -196,121 +198,131 @@ impl GitRepository {
             .unwrap_or_else(|| "unknown".to_string())
     }
 
-    // ==================== Read operations (via git2-rs) ====================
+    /// Run a blocking closure on the blocking thread pool.
+    async fn blocking<F, T>(&self, f: F) -> AppResult<T>
+    where
+        F: FnOnce(&LibGitOps) -> AppResult<T> + Send + 'static,
+        T: Send + 'static,
+    {
+        let libgit = Arc::clone(&self.libgit);
+        tokio::task::spawn_blocking(move || f(&libgit))
+            .await
+            .map_err(|e| AppError::General(format!("Blocking task failed: {}", e)))?
+    }
+
+    // ==================== Read operations (via git2-rs, on blocking pool) ====================
 
     /// Get current branch name
-    pub fn current_branch(&self) -> AppResult<String> {
-        self.libgit.current_branch()
+    pub async fn current_branch(&self) -> AppResult<String> {
+        self.blocking(|g| g.current_branch()).await
     }
 
     /// Get file statuses
-    pub fn status(&self) -> AppResult<Vec<FileStatus>> {
-        self.libgit.status()
+    pub async fn status(&self) -> AppResult<Vec<FileStatus>> {
+        self.blocking(|g| g.status()).await
     }
 
     /// Get diff for a file
-    pub fn diff_file(&self, path: &str, staged: bool) -> AppResult<DiffOutput> {
-        self.libgit.diff_file(path, staged)
+    pub async fn diff_file(&self, path: &str, staged: bool) -> AppResult<DiffOutput> {
+        let path = path.to_string();
+        self.blocking(move |g| g.diff_file(&path, staged)).await
     }
 
     /// Get all staged changes diff
-    pub fn diff_staged(&self) -> AppResult<DiffOutput> {
-        self.libgit.diff_staged()
+    pub async fn diff_staged(&self) -> AppResult<DiffOutput> {
+        self.blocking(|g| g.diff_staged()).await
     }
 
     /// List branches
-    pub fn branches(&self) -> AppResult<Vec<BranchInfo>> {
-        self.libgit.branches()
+    pub async fn branches(&self) -> AppResult<Vec<BranchInfo>> {
+        self.blocking(|g| g.branches()).await
     }
 
     /// Get commit log
-    pub fn log(&self, max_count: usize, all: bool) -> AppResult<Vec<CommitInfo>> {
-        self.libgit.log(max_count, all)
+    pub async fn log(&self, max_count: usize, all: bool) -> AppResult<Vec<CommitInfo>> {
+        self.blocking(move |g| g.log(max_count, all)).await
     }
 
-    // Phase 1 reads
-
     /// Get stash list
-    pub fn stash_list(&self) -> AppResult<Vec<StashEntry>> {
-        self.libgit.stash_list()
+    pub async fn stash_list(&self) -> AppResult<Vec<StashEntry>> {
+        self.blocking(|g| g.stash_list()).await
     }
 
     /// Get repository operation state
-    pub fn repo_state(&self) -> AppResult<RepoOperationState> {
-        self.libgit.repo_state()
+    pub async fn repo_state(&self) -> AppResult<RepoOperationState> {
+        self.blocking(|g| g.repo_state()).await
     }
 
-    // Phase 2 reads
-
     /// Get tags
-    pub fn tags(&self) -> AppResult<Vec<TagInfo>> {
-        self.libgit.tags()
+    pub async fn tags(&self) -> AppResult<Vec<TagInfo>> {
+        self.blocking(|g| g.tags()).await
     }
 
     /// Get remotes
-    pub fn remotes(&self) -> AppResult<Vec<RemoteInfo>> {
-        self.libgit.remotes()
+    pub async fn remotes(&self) -> AppResult<Vec<RemoteInfo>> {
+        self.blocking(|g| g.remotes()).await
     }
 
-    // Phase 3 reads
-
     /// Get conflict files
-    pub fn conflict_files(&self) -> AppResult<Vec<ConflictFile>> {
-        self.libgit.conflict_files()
+    pub async fn conflict_files(&self) -> AppResult<Vec<ConflictFile>> {
+        self.blocking(|g| g.conflict_files()).await
     }
 
     /// Read conflict file versions
-    pub fn read_conflict_versions(&self, path: &str) -> AppResult<ConflictVersions> {
-        self.libgit.read_conflict_versions(path)
+    pub async fn read_conflict_versions(&self, path: &str) -> AppResult<ConflictVersions> {
+        let path = path.to_string();
+        self.blocking(move |g| g.read_conflict_versions(&path)).await
     }
 
-    // Phase 4 reads
-
     /// Get diff for a specific commit
-    pub fn commit_diff(&self, commit_id: &str) -> AppResult<DiffOutput> {
-        self.libgit.commit_diff(commit_id)
+    pub async fn commit_diff(&self, commit_id: &str) -> AppResult<DiffOutput> {
+        let commit_id = commit_id.to_string();
+        self.blocking(move |g| g.commit_diff(&commit_id)).await
     }
 
     /// Get file history
-    pub fn file_log(&self, path: &str, max_count: usize) -> AppResult<Vec<CommitInfo>> {
-        self.libgit.file_log(path, max_count)
+    pub async fn file_log(&self, path: &str, max_count: usize) -> AppResult<Vec<CommitInfo>> {
+        let path = path.to_string();
+        self.blocking(move |g| g.file_log(&path, max_count)).await
     }
 
     /// Get blame for a file
-    pub fn blame(&self, path: &str) -> AppResult<Vec<BlameLine>> {
-        self.libgit.blame(path)
+    pub async fn blame(&self, path: &str) -> AppResult<Vec<BlameLine>> {
+        let path = path.to_string();
+        self.blocking(move |g| g.blame(&path)).await
     }
 
     /// Search commits by message
-    pub fn search_commits(&self, query: &str, max_count: usize) -> AppResult<Vec<CommitInfo>> {
-        self.libgit.search_commits(query, max_count)
+    pub async fn search_commits(&self, query: &str, max_count: usize) -> AppResult<Vec<CommitInfo>> {
+        let query = query.to_string();
+        self.blocking(move |g| g.search_commits(&query, max_count)).await
     }
 
     /// Get commit log with pagination
-    pub fn log_paged(&self, max_count: usize, skip: usize) -> AppResult<Vec<CommitInfo>> {
-        self.libgit.log_paged(max_count, skip)
+    pub async fn log_paged(&self, max_count: usize, skip: usize) -> AppResult<Vec<CommitInfo>> {
+        self.blocking(move |g| g.log_paged(max_count, skip)).await
     }
 
     /// Get commit log for a specific branch
-    pub fn log_branch(&self, branch: &str, max_count: usize, first_parent: bool) -> AppResult<Vec<CommitInfo>> {
-        self.libgit.log_branch(branch, max_count, first_parent)
+    pub async fn log_branch(&self, branch: &str, max_count: usize, first_parent: bool) -> AppResult<Vec<CommitInfo>> {
+        let branch = branch.to_string();
+        self.blocking(move |g| g.log_branch(&branch, max_count, first_parent)).await
     }
 
-    // Phase 5 reads
-
     /// Get line changes for gutter indicators
-    pub fn line_changes(&self, path: &str) -> AppResult<Vec<LineChange>> {
-        self.libgit.line_changes(path)
+    pub async fn line_changes(&self, path: &str) -> AppResult<Vec<LineChange>> {
+        let path = path.to_string();
+        self.blocking(move |g| g.line_changes(&path)).await
     }
 
     /// Get submodules
-    pub fn submodules(&self) -> AppResult<Vec<SubmoduleInfo>> {
-        self.libgit.submodules()
+    pub async fn submodules(&self) -> AppResult<Vec<SubmoduleInfo>> {
+        self.blocking(|g| g.submodules()).await
     }
 
     /// Get branch tip commit → branch names mapping
-    pub fn branch_tips(&self) -> AppResult<HashMap<String, Vec<String>>> {
-        self.libgit.branch_tips()
+    pub async fn branch_tips(&self) -> AppResult<HashMap<String, Vec<String>>> {
+        self.blocking(|g| g.branch_tips()).await
     }
 
     // ==================== Write operations (via git CLI) ====================

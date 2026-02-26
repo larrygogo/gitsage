@@ -35,7 +35,7 @@ pub async fn merge_continue(state: State<'_, AppState>) -> Result<(), AppError> 
 pub async fn get_repo_state(state: State<'_, AppState>) -> Result<RepoOperationState, AppError> {
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.repo_state()
+    repo.repo_state().await
 }
 
 // ==================== Cherry-pick ====================

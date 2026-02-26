@@ -1,4 +1,4 @@
-/// Prompt templates for AI features
+//! Prompt templates for AI features
 
 /// System prompt for commit message generation
 pub const COMMIT_MESSAGE_SYSTEM: &str = r#"You are an expert at writing clear, concise git commit messages.

@@ -85,7 +85,7 @@ pub async fn github_detect_repo(
         Some(r) => r,
         None => return Ok(None),
     };
-    let remotes = repo.remotes()?;
+    let remotes = repo.remotes().await?;
     for remote in &remotes {
         if remote.name == "origin" {
             return Ok(GitHubClient::parse_github_remote(&remote.url));

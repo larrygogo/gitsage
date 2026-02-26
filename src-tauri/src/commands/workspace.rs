@@ -11,7 +11,7 @@ use crate::state::AppState;
 pub async fn get_status(state: State<'_, AppState>) -> Result<Vec<FileStatus>, AppError> {
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.status()
+    repo.status().await
 }
 
 #[tauri::command]
@@ -39,14 +39,14 @@ pub async fn get_diff(
 ) -> Result<DiffOutput, AppError> {
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.diff_file(&path, staged)
+    repo.diff_file(&path, staged).await
 }
 
 #[tauri::command]
 pub async fn get_staged_diff(state: State<'_, AppState>) -> Result<DiffOutput, AppError> {
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.diff_staged()
+    repo.diff_staged().await
 }
 
 // ==================== Phase 1: Discard ====================
@@ -79,7 +79,7 @@ pub async fn stage_hunk(
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
 
-    let diff = repo.diff_file(&path, false)?;
+    let diff = repo.diff_file(&path, false).await?;
     let file = diff.files.first().ok_or(AppError::General("No diff found for file".into()))?;
     let hunk = file.hunks.get(hunk_index).ok_or(AppError::General("Hunk index out of range".into()))?;
 
@@ -96,7 +96,7 @@ pub async fn unstage_hunk(
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
 
-    let diff = repo.diff_file(&path, true)?;
+    let diff = repo.diff_file(&path, true).await?;
     let file = diff.files.first().ok_or(AppError::General("No diff found for file".into()))?;
     let hunk = file.hunks.get(hunk_index).ok_or(AppError::General("Hunk index out of range".into()))?;
 
@@ -114,7 +114,7 @@ pub async fn stage_lines(
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
 
-    let diff = repo.diff_file(&path, false)?;
+    let diff = repo.diff_file(&path, false).await?;
     let file = diff.files.first().ok_or(AppError::General("No diff found for file".into()))?;
     let hunk = file.hunks.get(hunk_index).ok_or(AppError::General("Hunk index out of range".into()))?;
 
@@ -131,7 +131,7 @@ pub async fn discard_hunk(
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
 
-    let diff = repo.diff_file(&path, false)?;
+    let diff = repo.diff_file(&path, false).await?;
     let file = diff.files.first().ok_or(AppError::General("No diff found for file".into()))?;
     let hunk = file.hunks.get(hunk_index).ok_or(AppError::General("Hunk index out of range".into()))?;
 
@@ -147,7 +147,7 @@ pub async fn get_conflict_files(
 ) -> Result<Vec<ConflictFile>, AppError> {
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.conflict_files()
+    repo.conflict_files().await
 }
 
 #[tauri::command]
@@ -157,7 +157,7 @@ pub async fn get_conflict_versions(
 ) -> Result<ConflictVersions, AppError> {
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.read_conflict_versions(&path)
+    repo.read_conflict_versions(&path).await
 }
 
 #[tauri::command]
@@ -190,7 +190,7 @@ pub async fn get_blame(
 ) -> Result<Vec<BlameLine>, AppError> {
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.blame(&path)
+    repo.blame(&path).await
 }
 
 // ==================== Phase 5: Line changes & Gitignore ====================
@@ -202,7 +202,7 @@ pub async fn get_line_changes(
 ) -> Result<Vec<LineChange>, AppError> {
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.line_changes(&path)
+    repo.line_changes(&path).await
 }
 
 #[tauri::command]

@@ -1,4 +1,4 @@
-import { type Component, createSignal, Show, For, onMount, onCleanup } from "solid-js";
+import { type Component, type JSX, createSignal, Show, For, onMount, onCleanup } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import GitPullRequest from "lucide-solid/icons/git-pull-request";
 import GitBranch from "lucide-solid/icons/git-branch";
@@ -86,7 +86,9 @@ const BranchPicker: Component<{
             <span class={styles.branchTriggerIcon} style={{ color: props.iconColor }}>
               <GitBranch size={14} />
             </span>
-            <span class={`${styles.branchTriggerText} ${!props.value ? styles.branchTriggerPlaceholder : ""}`}>
+            <span
+              class={`${styles.branchTriggerText} ${!props.value ? styles.branchTriggerPlaceholder : ""}`}
+            >
               {props.value || props.placeholder}
             </span>
           </span>
@@ -353,127 +355,127 @@ export const CreatePrDialog: Component<CreatePrDialogProps> = (props) => {
 
         {/* Meta Section: outside scroll area so dropdowns aren't clipped */}
         <div class={styles.metaSection}>
-            {/* Labels */}
-            <div class={styles.metaGroup}>
-              <span class={styles.metaLabel}>Labels</span>
-              <div class={styles.metaRow}>
-                <Show when={selectedLabels().length === 0}>
-                  <span class={styles.metaEmpty}>No labels</span>
-                </Show>
-                <For each={selectedLabels()}>
-                  {(label) => (
+          {/* Labels */}
+          <div class={styles.metaGroup}>
+            <span class={styles.metaLabel}>Labels</span>
+            <div class={styles.metaRow}>
+              <Show when={selectedLabels().length === 0}>
+                <span class={styles.metaEmpty}>No labels</span>
+              </Show>
+              <For each={selectedLabels()}>
+                {(label) => (
+                  <span
+                    class={styles.labelPill}
+                    style={{
+                      "background-color": `#${label.color}18`,
+                      color: getLabelTextColor(label.color),
+                    }}
+                    onClick={() => removeLabel(label.id)}
+                  >
                     <span
-                      class={styles.labelPill}
-                      style={{
-                        "background-color": `#${label.color}18`,
-                        color: getLabelTextColor(label.color),
-                      }}
-                      onClick={() => removeLabel(label.id)}
-                    >
-                      <span
-                        class={styles.labelPillDot}
-                        style={{ "background-color": `#${label.color}` }}
-                      />
-                      {label.name}
-                    </span>
-                  )}
-                </For>
-                <div style={{ position: "relative" }}>
-                  <button
-                    class={styles.metaAddBtn}
-                    onClick={() => setShowLabelPicker(!showLabelPicker())}
-                  >
-                    <Plus size={12} />
-                  </button>
-                  <Show when={showLabelPicker()}>
-                    <DropdownPicker
-                      items={availableLabels()}
-                      selected={selectedLabels().map((l) => l.name)}
-                      onToggle={(item) => toggleLabel(item as LabelInfo)}
-                      onClose={() => setShowLabelPicker(false)}
-                      renderItem={(item) => {
-                        const label = item as LabelInfo;
-                        return (
-                          <div style={{ display: "flex", "align-items": "center", gap: "8px" }}>
-                            <span
-                              style={{
-                                width: "8px",
-                                height: "8px",
-                                "border-radius": "50%",
-                                "flex-shrink": "0",
-                                "background-color": `#${label.color}`,
-                              }}
-                            />
-                            <span>{label.name}</span>
-                          </div>
-                        );
-                      }}
-                      getKey={(item) => (item as LabelInfo).name}
-                      emptyText="No labels in repo"
+                      class={styles.labelPillDot}
+                      style={{ "background-color": `#${label.color}` }}
                     />
-                  </Show>
-                </div>
-              </div>
-            </div>
-
-            {/* Reviewers */}
-            <div class={styles.metaGroup}>
-              <span class={styles.metaLabel}>Reviewers</span>
-              <div class={styles.metaRow}>
-                <Show when={selectedReviewers().length === 0}>
-                  <span class={styles.metaEmpty}>No reviewers</span>
+                    {label.name}
+                  </span>
+                )}
+              </For>
+              <div style={{ position: "relative" }}>
+                <button
+                  class={styles.metaAddBtn}
+                  onClick={() => setShowLabelPicker(!showLabelPicker())}
+                >
+                  <Plus size={12} />
+                </button>
+                <Show when={showLabelPicker()}>
+                  <DropdownPicker
+                    items={availableLabels()}
+                    selected={selectedLabels().map((l) => l.name)}
+                    onToggle={(item) => toggleLabel(item as LabelInfo)}
+                    onClose={() => setShowLabelPicker(false)}
+                    renderItem={(item) => {
+                      const label = item as LabelInfo;
+                      return (
+                        <div style={{ display: "flex", "align-items": "center", gap: "8px" }}>
+                          <span
+                            style={{
+                              width: "8px",
+                              height: "8px",
+                              "border-radius": "50%",
+                              "flex-shrink": "0",
+                              "background-color": `#${label.color}`,
+                            }}
+                          />
+                          <span>{label.name}</span>
+                        </div>
+                      );
+                    }}
+                    getKey={(item) => (item as LabelInfo).name}
+                    emptyText="No labels in repo"
+                  />
                 </Show>
-                <For each={selectedReviewers()}>
-                  {(reviewer) => (
-                    <span class={styles.reviewerChip} onClick={() => removeReviewer(reviewer.login)}>
-                      <img
-                        class={styles.reviewerAvatar}
-                        src={reviewer.avatar_url}
-                        alt={reviewer.login}
-                      />
-                      <span class={styles.reviewerName}>{reviewer.login}</span>
-                    </span>
-                  )}
-                </For>
-                <div style={{ position: "relative" }}>
-                  <button
-                    class={styles.metaAddBtn}
-                    onClick={() => setShowReviewerPicker(!showReviewerPicker())}
-                  >
-                    <Plus size={14} />
-                  </button>
-                  <Show when={showReviewerPicker()}>
-                    <DropdownPicker
-                      items={collaborators()}
-                      selected={selectedReviewers().map((r) => r.login)}
-                      onToggle={(item) => toggleReviewer(item as UserInfo)}
-                      onClose={() => setShowReviewerPicker(false)}
-                      renderItem={(item) => {
-                        const user = item as UserInfo;
-                        return (
-                          <div style={{ display: "flex", "align-items": "center", gap: "8px" }}>
-                            <img
-                              src={user.avatar_url}
-                              alt={user.login}
-                              style={{
-                                width: "18px",
-                                height: "18px",
-                                "border-radius": "50%",
-                                "flex-shrink": "0",
-                              }}
-                            />
-                            <span>{user.login}</span>
-                          </div>
-                        );
-                      }}
-                      getKey={(item) => (item as UserInfo).login}
-                      emptyText="No collaborators"
-                    />
-                  </Show>
-                </div>
               </div>
             </div>
           </div>
+
+          {/* Reviewers */}
+          <div class={styles.metaGroup}>
+            <span class={styles.metaLabel}>Reviewers</span>
+            <div class={styles.metaRow}>
+              <Show when={selectedReviewers().length === 0}>
+                <span class={styles.metaEmpty}>No reviewers</span>
+              </Show>
+              <For each={selectedReviewers()}>
+                {(reviewer) => (
+                  <span class={styles.reviewerChip} onClick={() => removeReviewer(reviewer.login)}>
+                    <img
+                      class={styles.reviewerAvatar}
+                      src={reviewer.avatar_url}
+                      alt={reviewer.login}
+                    />
+                    <span class={styles.reviewerName}>{reviewer.login}</span>
+                  </span>
+                )}
+              </For>
+              <div style={{ position: "relative" }}>
+                <button
+                  class={styles.metaAddBtn}
+                  onClick={() => setShowReviewerPicker(!showReviewerPicker())}
+                >
+                  <Plus size={14} />
+                </button>
+                <Show when={showReviewerPicker()}>
+                  <DropdownPicker
+                    items={collaborators()}
+                    selected={selectedReviewers().map((r) => r.login)}
+                    onToggle={(item) => toggleReviewer(item as UserInfo)}
+                    onClose={() => setShowReviewerPicker(false)}
+                    renderItem={(item) => {
+                      const user = item as UserInfo;
+                      return (
+                        <div style={{ display: "flex", "align-items": "center", gap: "8px" }}>
+                          <img
+                            src={user.avatar_url}
+                            alt={user.login}
+                            style={{
+                              width: "18px",
+                              height: "18px",
+                              "border-radius": "50%",
+                              "flex-shrink": "0",
+                            }}
+                          />
+                          <span>{user.login}</span>
+                        </div>
+                      );
+                    }}
+                    getKey={(item) => (item as UserInfo).login}
+                    emptyText="No collaborators"
+                  />
+                </Show>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Footer */}
         <div class={styles.footer}>
@@ -488,11 +490,7 @@ export const CreatePrDialog: Component<CreatePrDialogProps> = (props) => {
             <button class={styles.cancelBtn} onClick={props.onClose}>
               Cancel
             </button>
-            <button
-              class={styles.createBtn}
-              onClick={handleCreate}
-              disabled={submitting()}
-            >
+            <button class={styles.createBtn} onClick={handleCreate} disabled={submitting()}>
               <GitPullRequest size={14} />
               {submitting() ? "Creating..." : "Create Pull Request"}
             </button>
@@ -509,7 +507,7 @@ const DropdownPicker: Component<{
   selected: string[];
   onToggle: (item: unknown) => void;
   onClose: () => void;
-  renderItem: (item: unknown) => any;
+  renderItem: (item: unknown) => JSX.Element;
   getKey: (item: unknown) => string;
   emptyText: string;
 }> = (props) => {

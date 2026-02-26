@@ -442,6 +442,29 @@ pub async fn write_merge_result(
     content: &str,
 ) -> AppResult<()> {
     let file_path = repo_path.join(path);
+
+    // Validate that the resolved path stays within the repository directory
+    let canonical_repo = repo_path.canonicalize().map_err(|e| {
+        AppError::PathValidation(format!("Failed to resolve repo path: {}", e))
+    })?;
+    let canonical_file = file_path.canonicalize().unwrap_or_else(|_| {
+        // File may not exist yet; canonicalize parent then append filename
+        if let Some(parent) = file_path.parent() {
+            if let Ok(canonical_parent) = parent.canonicalize() {
+                if let Some(name) = file_path.file_name() {
+                    return canonical_parent.join(name);
+                }
+            }
+        }
+        file_path.clone()
+    });
+    if !canonical_file.starts_with(&canonical_repo) {
+        return Err(AppError::PathValidation(format!(
+            "Path '{}' escapes repository directory",
+            path
+        )));
+    }
+
     std::fs::write(&file_path, content).map_err(|e| {
         AppError::GitCli(format!("Failed to write merge result to {}: {}", path, e))
     })?;

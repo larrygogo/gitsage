@@ -21,6 +21,7 @@ import FolderOpenIcon from "lucide-solid/icons/folder-open";
 import { Button } from "@/components/ui";
 import { useI18n } from "@/i18n";
 import type { BranchInfo, TagInfo } from "@/types";
+import { logger } from "@/utils/logger";
 import styles from "./BranchesView.module.css";
 
 export interface BranchesViewProps {
@@ -101,7 +102,12 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
   const [showRemoteBranches, setShowRemoteBranches] = createSignal(true);
   const [expandedBranchDirs, setExpandedBranchDirs] = createSignal<Set<string>>(new Set());
   const [branchViewMode, setBranchViewMode] = createSignal<"tree" | "list">("tree");
-  const [contextMenu, setContextMenu] = createSignal<{ x: number; y: number; branch: BranchInfo; isRemote: boolean } | null>(null);
+  const [contextMenu, setContextMenu] = createSignal<{
+    x: number;
+    y: number;
+    branch: BranchInfo;
+    isRemote: boolean;
+  } | null>(null);
 
   const branches = () => props.branches ?? [];
   const tags = () => props.tags ?? [];
@@ -145,7 +151,7 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
       setNewBranchName("");
       setCreateMode(false);
     } catch (err) {
-      console.error("[BranchesView] 创建分支失败:", err);
+      logger.error("BranchesView", "创建分支失败:", err);
     }
   };
 
@@ -153,7 +159,7 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
     try {
       await props.onCheckoutBranch?.(name);
     } catch (err) {
-      console.error("[BranchesView] 切换分支失败:", err);
+      logger.error("BranchesView", "切换分支失败:", err);
     }
   };
 
@@ -161,7 +167,7 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
     try {
       await props.onDeleteBranch?.(name);
     } catch (err) {
-      console.error("[BranchesView] 删除分支失败:", err);
+      logger.error("BranchesView", "删除分支失败:", err);
     }
   };
 
@@ -180,7 +186,7 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
     try {
       await props.onRenameBranch?.(oldName, newName);
     } catch (err) {
-      console.error("[BranchesView] 重命名分支失败:", err);
+      logger.error("BranchesView", "重命名分支失败:", err);
     }
     setRenamingBranch(null);
   };
@@ -189,7 +195,7 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
     try {
       await props.onMergeBranch?.(name);
     } catch (err) {
-      console.error("[BranchesView] 合并分支失败:", err);
+      logger.error("BranchesView", "合并分支失败:", err);
     }
   };
 
@@ -197,7 +203,7 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
     try {
       await props.onRebaseOnto?.(name);
     } catch (err) {
-      console.error("[BranchesView] 变基失败:", err);
+      logger.error("BranchesView", "变基失败:", err);
     }
   };
 
@@ -210,7 +216,7 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
       setNewTagName("");
       setNewTagMessage("");
     } catch (err) {
-      console.error("[BranchesView] 创建标签失败:", err);
+      logger.error("BranchesView", "创建标签失败:", err);
     }
   };
 
@@ -232,10 +238,16 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
     return (
       <span class={styles.trackingInfo}>
         <Show when={branch.ahead > 0}>
-          <span class={styles.ahead}><ArrowUp size={10} />{branch.ahead}</span>
+          <span class={styles.ahead}>
+            <ArrowUp size={10} />
+            {branch.ahead}
+          </span>
         </Show>
         <Show when={branch.behind > 0}>
-          <span class={styles.behind}><ArrowDown size={10} />{branch.behind}</span>
+          <span class={styles.behind}>
+            <ArrowDown size={10} />
+            {branch.behind}
+          </span>
         </Show>
       </span>
     );
@@ -247,7 +259,9 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
       style={{ "padding-left": `${16 + depth * 16}px` }}
       onContextMenu={(e) => handleContextMenu(e, branch, false)}
     >
-      <span class={styles.branchIcon}><GitBranch size={14} /></span>
+      <span class={styles.branchIcon}>
+        <GitBranch size={14} />
+      </span>
       <Show
         when={renamingBranch() !== branch.name}
         fallback={
@@ -326,7 +340,9 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
       style={{ "padding-left": `${16 + depth * 16}px` }}
       onContextMenu={(e) => handleContextMenu(e, branch, true)}
     >
-      <span class={styles.branchIcon}><Cloud size={14} /></span>
+      <span class={styles.branchIcon}>
+        <Cloud size={14} />
+      </span>
       <span class={styles.branchName}>{branch.name}</span>
       {renderTrackingInfo(branch)}
       <div class={styles.branchActions}>
@@ -358,10 +374,18 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
             onClick={() => toggleBranchDir(node.fullPath)}
           >
             <span class={styles.branchTreeChevron}>
-              {isBranchDirExpanded(node.fullPath) ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
+              {isBranchDirExpanded(node.fullPath) ? (
+                <ChevronDown size={10} />
+              ) : (
+                <ChevronRight size={10} />
+              )}
             </span>
             <span class={styles.branchTreeFolderIcon}>
-              {isBranchDirExpanded(node.fullPath) ? <FolderOpenIcon size={14} /> : <FolderIcon size={14} />}
+              {isBranchDirExpanded(node.fullPath) ? (
+                <FolderOpenIcon size={14} />
+              ) : (
+                <FolderIcon size={14} />
+              )}
             </span>
             <span class={styles.branchTreeFolderName}>{node.name}</span>
           </div>
@@ -376,11 +400,7 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
   const renderBranchList = (
     branchList: BranchInfo[],
     renderItem: (branch: BranchInfo, depth: number) => JSX.Element,
-  ): JSX.Element => (
-    <For each={branchList}>
-      {(branch) => renderItem(branch, 0)}
-    </For>
-  );
+  ): JSX.Element => <For each={branchList}>{(branch) => renderItem(branch, 0)}</For>;
 
   return (
     <div class={styles.branches} onClick={handleGlobalClick}>
@@ -401,7 +421,15 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
       {/* 搜索栏 + 新建按钮 */}
       <div class={styles.createSection}>
         <div style={{ position: "relative", flex: "1", display: "flex", "align-items": "center" }}>
-          <Search size={14} style={{ position: "absolute", left: "8px", color: "var(--gs-text-muted)", "pointer-events": "none" }} />
+          <Search
+            size={14}
+            style={{
+              position: "absolute",
+              left: "8px",
+              color: "var(--gs-text-muted)",
+              "pointer-events": "none",
+            }}
+          />
           <input
             class={styles.createInput}
             style={{ "padding-left": "28px" }}
@@ -412,12 +440,22 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
         </div>
         <button
           style={{
-            display: "inline-flex", "align-items": "center", "justify-content": "center",
-            width: "30px", height: "30px", background: "none",
-            border: "1px solid var(--gs-border-primary)", "border-radius": "4px",
-            cursor: "pointer", color: "var(--gs-text-secondary)", "flex-shrink": "0",
+            display: "inline-flex",
+            "align-items": "center",
+            "justify-content": "center",
+            width: "30px",
+            height: "30px",
+            background: "none",
+            border: "1px solid var(--gs-border-primary)",
+            "border-radius": "4px",
+            cursor: "pointer",
+            color: "var(--gs-text-secondary)",
+            "flex-shrink": "0",
           }}
-          onClick={() => { setCreateMode(!createMode()); setNewBranchName(""); }}
+          onClick={() => {
+            setCreateMode(!createMode());
+            setNewBranchName("");
+          }}
           title={t("branches.create")}
         >
           <Plus size={14} />
@@ -454,12 +492,22 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
           </Button>
           <button
             style={{
-              display: "inline-flex", "align-items": "center", "justify-content": "center",
-              width: "30px", height: "30px", background: "none",
-              border: "1px solid var(--gs-border-primary)", "border-radius": "4px",
-              cursor: "pointer", color: "var(--gs-text-secondary)", "flex-shrink": "0",
+              display: "inline-flex",
+              "align-items": "center",
+              "justify-content": "center",
+              width: "30px",
+              height: "30px",
+              background: "none",
+              border: "1px solid var(--gs-border-primary)",
+              "border-radius": "4px",
+              cursor: "pointer",
+              color: "var(--gs-text-secondary)",
+              "flex-shrink": "0",
             }}
-            onClick={() => { setCreateMode(false); setNewBranchName(""); }}
+            onClick={() => {
+              setCreateMode(false);
+              setNewBranchName("");
+            }}
             title={t("common.cancel")}
           >
             <X size={14} />
@@ -471,7 +519,10 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
       <div class={styles.content}>
         {/* 本地分支 */}
         <div class={`${styles.group} ${showLocalBranches() ? styles.groupOpen : ""}`}>
-          <div class={styles.groupHeader} onClick={() => setShowLocalBranches(!showLocalBranches())}>
+          <div
+            class={styles.groupHeader}
+            onClick={() => setShowLocalBranches(!showLocalBranches())}
+          >
             <div class={styles.groupHeaderLeft}>
               {showLocalBranches() ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
               {t("branches.local")}
@@ -501,7 +552,10 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
 
         {/* 远程分支 */}
         <div class={`${styles.group} ${showRemoteBranches() ? styles.groupOpen : ""}`}>
-          <div class={styles.groupHeader} onClick={() => setShowRemoteBranches(!showRemoteBranches())}>
+          <div
+            class={styles.groupHeader}
+            onClick={() => setShowRemoteBranches(!showRemoteBranches())}
+          >
             <div class={styles.groupHeaderLeft}>
               {showRemoteBranches() ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
               {t("branches.remote")}
@@ -557,19 +611,30 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
                 value={newTagName()}
                 onInput={(e) => setNewTagName(e.currentTarget.value)}
               />
-              <Button variant="ghost" size="sm" onClick={handleCreateTag} disabled={!newTagName().trim()}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCreateTag}
+                disabled={!newTagName().trim()}
+              >
                 {t("branches.createTag")}
               </Button>
             </div>
             <Show
               when={tags().length > 0}
-              fallback={<div class={styles.emptyState}><span class={styles.emptyText}>{t("branches.noTags")}</span></div>}
+              fallback={
+                <div class={styles.emptyState}>
+                  <span class={styles.emptyText}>{t("branches.noTags")}</span>
+                </div>
+              }
             >
               <div class={styles.branchList}>
                 <For each={tags()}>
                   {(tag) => (
                     <div class={styles.branchItem}>
-                      <span class={styles.branchIcon}><Tag size={14} /></span>
+                      <span class={styles.branchIcon}>
+                        <Tag size={14} />
+                      </span>
                       <span class={styles.branchName}>{tag.name}</span>
                       <Show when={!tag.is_lightweight}>
                         <span style={{ "font-size": "10px", color: "var(--gs-text-muted)" }}>
@@ -581,7 +646,9 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
                           class={`${styles.branchActionBtn} ${styles.danger}`}
                           onClick={() => props.onDeleteTag?.(tag.name)}
                           title={t("branches.deleteTag")}
-                        ><Trash2 size={12} /></button>
+                        >
+                          <Trash2 size={12} />
+                        </button>
                       </div>
                     </div>
                   )}
@@ -606,19 +673,28 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
                 <Show when={!menu().branch.is_head}>
                   <button
                     class={styles.contextMenuItem}
-                    onClick={() => { handleCheckout(menu().branch.name); closeContextMenu(); }}
+                    onClick={() => {
+                      handleCheckout(menu().branch.name);
+                      closeContextMenu();
+                    }}
                   >
                     {t("branches.contextMenu.checkout")}
                   </button>
                   <button
                     class={styles.contextMenuItem}
-                    onClick={() => { handleMerge(menu().branch.name); closeContextMenu(); }}
+                    onClick={() => {
+                      handleMerge(menu().branch.name);
+                      closeContextMenu();
+                    }}
                   >
                     {t("branches.contextMenu.mergeToCurrent")}
                   </button>
                   <button
                     class={styles.contextMenuItem}
-                    onClick={() => { handleRebase(menu().branch.name); closeContextMenu(); }}
+                    onClick={() => {
+                      handleRebase(menu().branch.name);
+                      closeContextMenu();
+                    }}
                   >
                     {t("branches.contextMenu.rebaseTo")}
                   </button>
@@ -626,14 +702,20 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
                 </Show>
                 <button
                   class={styles.contextMenuItem}
-                  onClick={() => { handleStartRename(menu().branch.name); closeContextMenu(); }}
+                  onClick={() => {
+                    handleStartRename(menu().branch.name);
+                    closeContextMenu();
+                  }}
                 >
                   {t("branches.contextMenu.rename")}
                 </button>
                 <Show when={!menu().branch.is_head}>
                   <button
                     class={`${styles.contextMenuItem} ${styles.contextMenuItemDanger}`}
-                    onClick={() => { handleDelete(menu().branch.name); closeContextMenu(); }}
+                    onClick={() => {
+                      handleDelete(menu().branch.name);
+                      closeContextMenu();
+                    }}
                   >
                     {t("branches.contextMenu.delete")}
                   </button>
@@ -649,7 +731,10 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
               <Show when={menu().isRemote}>
                 <button
                   class={styles.contextMenuItem}
-                  onClick={() => { handleCheckout(menu().branch.name); closeContextMenu(); }}
+                  onClick={() => {
+                    handleCheckout(menu().branch.name);
+                    closeContextMenu();
+                  }}
                 >
                   {t("branches.contextMenu.checkoutRemote")}
                 </button>

@@ -7,6 +7,7 @@ import Download from "lucide-solid/icons/download";
 import { useI18n } from "@/i18n";
 import type { RepoEntry } from "@/types";
 import { getRecentRepos } from "@/services/git";
+import { logger } from "@/utils/logger";
 import styles from "./WelcomeView.module.css";
 
 export interface WelcomeViewProps {
@@ -27,7 +28,7 @@ const WelcomeView: Component<WelcomeViewProps> = (props) => {
       const repos = await getRecentRepos();
       setRecentRepos(repos);
     } catch (err) {
-      console.error("[WelcomeView] 获取最近仓库失败:", err);
+      logger.error("WelcomeView", "获取最近仓库失败:", err);
     }
   });
 
@@ -38,7 +39,7 @@ const WelcomeView: Component<WelcomeViewProps> = (props) => {
     const all = !q
       ? recentRepos()
       : recentRepos().filter(
-          (r) => r.name.toLowerCase().includes(q) || r.path.toLowerCase().includes(q)
+          (r) => r.name.toLowerCase().includes(q) || r.path.toLowerCase().includes(q),
         );
     // 搜索时显示全部结果；非搜索时截断到 MAX_VISIBLE
     if (q) return all;
@@ -86,9 +87,7 @@ const WelcomeView: Component<WelcomeViewProps> = (props) => {
             <div class={styles.heroText}>
               <h1 class={styles.heroTitleMuted}>{t("welcome.heroTitleMuted")}</h1>
               <h1 class={styles.heroTitleBold}>{t("welcome.heroTitleBold")}</h1>
-              <p class={styles.heroSubtitle}>
-                {t("welcome.heroSubtitle")}
-              </p>
+              <p class={styles.heroSubtitle}>{t("welcome.heroSubtitle")}</p>
             </div>
 
             {/* Feature List */}

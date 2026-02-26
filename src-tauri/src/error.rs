@@ -29,6 +29,15 @@ pub enum AppError {
     #[error("Repository not found: {0}")]
     RepoNotFound(String),
 
+    #[error("Path validation error: {0}")]
+    PathValidation(String),
+
+    #[error("Invalid repository state: {0}")]
+    RepoState(String),
+
+    #[error("Invalid input: {0}")]
+    InvalidInput(String),
+
     #[error("{0}")]
     General(String),
 }

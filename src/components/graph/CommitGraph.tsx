@@ -1,21 +1,14 @@
-import {
-  type Component,
-  createSignal,
-  createMemo,
-  createEffect,
-  For,
-  Show,
-} from 'solid-js';
-import Cloud from 'lucide-solid/icons/cloud';
-import TagIcon from 'lucide-solid/icons/tag';
-import type { CommitInfo } from '@/types';
+import { type Component, createSignal, createMemo, createEffect, For, Show } from "solid-js";
+import Cloud from "lucide-solid/icons/cloud";
+import TagIcon from "lucide-solid/icons/tag";
+import type { CommitInfo } from "@/types";
 import {
   calculateGraphLayout,
   LANE_WIDTH,
   ROW_HEIGHT,
   type GraphNode,
   type GraphEdge,
-} from './GraphCalculator';
+} from "./GraphCalculator";
 
 export interface CommitGraphProps {
   commits: CommitInfo[];
@@ -33,22 +26,22 @@ const MIN_GRAPH_WIDTH = 48;
 /** Seed colors defined as [hue, saturation] pairs.
  *  Lightness is chosen at runtime based on active theme. */
 const SEED_HS: [number, number][] = [
-  [160, 60],  // emerald
-  [217, 91],  // blue
-  [271, 91],  // purple
-  [330, 81],  // pink
-  [188, 95],  // cyan
-  [239, 84],  // indigo
-  [173, 80],  // teal
-  [292, 91],  // fuchsia
-  [84,  81],  // lime
-  [350, 89],  // rose
-  [189, 94],  // sky
-  [25,  95],  // orange
+  [160, 60], // emerald
+  [217, 91], // blue
+  [271, 91], // purple
+  [330, 81], // pink
+  [188, 95], // cyan
+  [239, 84], // indigo
+  [173, 80], // teal
+  [292, 91], // fuchsia
+  [84, 81], // lime
+  [350, 89], // rose
+  [189, 94], // sky
+  [25, 95], // orange
 ];
 
 function isDarkTheme(): boolean {
-  return document.documentElement.getAttribute('data-theme') !== 'light';
+  return document.documentElement.getAttribute("data-theme") !== "light";
 }
 
 /** Resolve a seed color to an HSL string with theme-appropriate lightness. */
@@ -84,12 +77,12 @@ function hashString(str: string): number {
 }
 
 function getLocalBranchName(branchName: string): string {
-  const slashIdx = branchName.indexOf('/');
+  const slashIdx = branchName.indexOf("/");
   return slashIdx >= 0 ? branchName.slice(slashIdx + 1) : branchName;
 }
 
 function isRemoteBranch(branchName: string): boolean {
-  return branchName.includes('/');
+  return branchName.includes("/");
 }
 
 function resolveColorByIndex(idx: number): string {
@@ -125,29 +118,11 @@ function getBranchColor(branchName: string): string {
 }
 
 /** Tag badge uses a fixed amber/gold color */
-const TAG_COLOR = '#F59E0B';
+const TAG_COLOR = "#F59E0B";
 
-function formatTime(timestamp: number): string {
-  const date = new Date(timestamp * 1000);
-  const now = Date.now();
-  const diff = now - date.getTime();
-  const seconds = Math.floor(diff / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
+import { shortHash, formatRelativeTime } from "@/utils/format";
 
-  if (days > 7) {
-    return date.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' });
-  }
-  if (days > 0) return `${days} days ago`;
-  if (hours > 0) return `${hours} hours ago`;
-  if (minutes > 0) return `${minutes} min ago`;
-  return 'just now';
-}
-
-function shortHash(id: string): string {
-  return id.slice(0, 7);
-}
+const formatTime = formatRelativeTime;
 
 const CommitGraph: Component<CommitGraphProps> = (props) => {
   const [renderLimit, setRenderLimit] = createSignal(RENDER_BATCH);
@@ -178,8 +153,8 @@ const CommitGraph: Component<CommitGraphProps> = (props) => {
   /** Pick the best branch name from a list of ref names (prefer local, skip tags). */
   function pickBranchName(refNames: string[]): string | undefined {
     const sorted = [...refNames].sort();
-    const local = sorted.find((n) => !n.startsWith('tag:') && !isRemoteBranch(n));
-    const any = sorted.find((n) => !n.startsWith('tag:'));
+    const local = sorted.find((n) => !n.startsWith("tag:") && !isRemoteBranch(n));
+    const any = sorted.find((n) => !n.startsWith("tag:"));
     return local ?? any;
   }
 
@@ -259,7 +234,7 @@ const CommitGraph: Component<CommitGraphProps> = (props) => {
       `L ${x2 - dx * r} ${stepY}`,
       `Q ${x2} ${stepY} ${x2} ${stepY + r}`,
       `L ${x2} ${y2}`,
-    ].join(' ');
+    ].join(" ");
   }
 
   function handleScroll() {
@@ -288,23 +263,36 @@ const CommitGraph: Component<CommitGraphProps> = (props) => {
     <Show
       when={props.commits.length > 0}
       fallback={
-        <div style={{
-          display: 'flex', 'align-items': 'center', 'justify-content': 'center',
-          height: '100%', color: 'var(--gs-text-muted)',
-          'font-family': '"Geist Sans", sans-serif', 'font-size': '14px',
-        }}>
+        <div
+          style={{
+            display: "flex",
+            "align-items": "center",
+            "justify-content": "center",
+            height: "100%",
+            color: "var(--gs-text-muted)",
+            "font-family": '"Geist Sans", sans-serif',
+            "font-size": "14px",
+          }}
+        >
           No commits found
         </div>
       }
     >
-      <div ref={scrollRef} style={{ width: '100%', height: '100%', overflow: 'auto' }} onScroll={handleScroll}>
-        <div style={{ position: 'relative' }}>
+      <div
+        ref={scrollRef}
+        style={{ width: "100%", height: "100%", overflow: "auto" }}
+        onScroll={handleScroll}
+      >
+        <div style={{ position: "relative" }}>
           {/* SVG edges layer */}
           <svg
             style={{
-              position: 'absolute', top: '0', left: '0',
-              width: `${graphWidth()}px`, height: `${totalSvgHeight()}px`,
-              'pointer-events': 'none',
+              position: "absolute",
+              top: "0",
+              left: "0",
+              width: `${graphWidth()}px`,
+              height: `${totalSvgHeight()}px`,
+              "pointer-events": "none",
             }}
           >
             <For each={layout().edges}>
@@ -332,70 +320,82 @@ const CommitGraph: Component<CommitGraphProps> = (props) => {
                 <div
                   data-commit-id={node.commitId}
                   style={{
-                    display: 'flex',
-                    'align-items': 'center',
+                    display: "flex",
+                    "align-items": "center",
                     height: `${ROW_HEIGHT}px`,
-                    cursor: 'pointer',
-                    'border-bottom': '1px solid var(--gs-border-primary)',
-                    'background-color': isSelected() ? '#FF840008' : 'transparent',
-                    transition: 'background-color 0.1s',
+                    cursor: "pointer",
+                    "border-bottom": "1px solid var(--gs-border-primary)",
+                    "background-color": isSelected() ? "#FF840008" : "transparent",
+                    transition: "background-color 0.1s",
                   }}
                   onClick={() => handleRowClick(node.commitId)}
                   onMouseEnter={(e) => {
                     if (!isSelected()) {
-                      (e.currentTarget as HTMLDivElement).style.backgroundColor = 'var(--gs-accent-subtle)';
+                      (e.currentTarget as HTMLDivElement).style.backgroundColor =
+                        "var(--gs-accent-subtle)";
                     }
-                    if (dotRef) dotRef.style.transform = 'scale(1.4)';
+                    if (dotRef) dotRef.style.transform = "scale(1.4)";
                   }}
                   onMouseLeave={(e) => {
                     if (!isSelected()) {
-                      (e.currentTarget as HTMLDivElement).style.backgroundColor = '';
+                      (e.currentTarget as HTMLDivElement).style.backgroundColor = "";
                     }
-                    if (dotRef) dotRef.style.transform = '';
+                    if (dotRef) dotRef.style.transform = "";
                   }}
                 >
                   {/* Graph cell */}
-                  <div style={{
-                    'flex-shrink': '0', position: 'relative',
-                    width: `${graphWidth()}px`, height: `${ROW_HEIGHT}px`,
-                  }}>
-                    <svg style={{
-                      position: 'absolute', top: '0', left: '0',
-                      width: `${graphWidth()}px`, height: `${ROW_HEIGHT}px`,
-                    }}>
+                  <div
+                    style={{
+                      "flex-shrink": "0",
+                      position: "relative",
+                      width: `${graphWidth()}px`,
+                      height: `${ROW_HEIGHT}px`,
+                    }}
+                  >
+                    <svg
+                      style={{
+                        position: "absolute",
+                        top: "0",
+                        left: "0",
+                        width: `${graphWidth()}px`,
+                        height: `${ROW_HEIGHT}px`,
+                      }}
+                    >
                       <g
                         ref={dotRef}
                         style={{
-                          'transform-origin': `${node.x + GRAPH_PAD_LEFT + NODE_RADIUS}px ${ROW_HEIGHT / 2}px`,
-                          transition: 'transform 0.15s ease',
+                          "transform-origin": `${node.x + GRAPH_PAD_LEFT + NODE_RADIUS}px ${ROW_HEIGHT / 2}px`,
+                          transition: "transform 0.15s ease",
                         }}
                       >
-                        {node.parentIds.length > 1 ? (() => {
-                          // Merge node: both ring and inner dot use the merge-source
-                          // (second parent / incoming branch) color.
-                          const mergeParent = graphNodeMap().get(node.parentIds[1]);
-                          const mergeSourceColor = mergeParent
-                            ? nodeColor()(mergeParent.commitId)
-                            : nodeColor()(node.commitId);
-                          return (
-                            <>
-                              <circle
-                                cx={node.x + GRAPH_PAD_LEFT + NODE_RADIUS}
-                                cy={ROW_HEIGHT / 2}
-                                r={4.5}
-                                fill="var(--gs-bg-primary, #0A0A0A)"
-                                stroke={mergeSourceColor}
-                                stroke-width="2.5"
-                              />
-                              <circle
-                                cx={node.x + GRAPH_PAD_LEFT + NODE_RADIUS}
-                                cy={ROW_HEIGHT / 2}
-                                r={2}
-                                fill={mergeSourceColor}
-                              />
-                            </>
-                          );
-                        })() : (
+                        {node.parentIds.length > 1 ? (
+                          (() => {
+                            // Merge node: both ring and inner dot use the merge-source
+                            // (second parent / incoming branch) color.
+                            const mergeParent = graphNodeMap().get(node.parentIds[1]);
+                            const mergeSourceColor = mergeParent
+                              ? nodeColor()(mergeParent.commitId)
+                              : nodeColor()(node.commitId);
+                            return (
+                              <>
+                                <circle
+                                  cx={node.x + GRAPH_PAD_LEFT + NODE_RADIUS}
+                                  cy={ROW_HEIGHT / 2}
+                                  r={4.5}
+                                  fill="var(--gs-bg-primary, #0A0A0A)"
+                                  stroke={mergeSourceColor}
+                                  stroke-width="2.5"
+                                />
+                                <circle
+                                  cx={node.x + GRAPH_PAD_LEFT + NODE_RADIUS}
+                                  cy={ROW_HEIGHT / 2}
+                                  r={2}
+                                  fill={mergeSourceColor}
+                                />
+                              </>
+                            );
+                          })()
+                        ) : (
                           /* Normal node: solid circle */
                           <circle
                             cx={node.x + GRAPH_PAD_LEFT + NODE_RADIUS}
@@ -413,48 +413,75 @@ const CommitGraph: Component<CommitGraphProps> = (props) => {
                     {(c) => {
                       const branches = () => props.branchTips?.[c().id] ?? [];
                       return (
-                        <div style={{
-                          flex: '1', display: 'flex', 'align-items': 'center',
-                          gap: '16px', overflow: 'hidden', 'padding-right': '20px',
-                        }}>
+                        <div
+                          style={{
+                            flex: "1",
+                            display: "flex",
+                            "align-items": "center",
+                            gap: "16px",
+                            overflow: "hidden",
+                            "padding-right": "20px",
+                          }}
+                        >
                           {/* Commit info */}
-                          <div style={{
-                            flex: '1', display: 'flex', 'flex-direction': 'column',
-                            gap: '4px', 'min-width': '0',
-                          }}>
-                            <span style={{
-                              'font-family': '"Geist Sans", sans-serif',
-                              'font-size': '13px',
-                              'font-weight': isSelected() ? '500' : 'normal',
-                              color: isSelected() ? 'var(--gs-text-primary)' : 'var(--gs-text-secondary)',
-                              overflow: 'hidden', 'text-overflow': 'ellipsis', 'white-space': 'nowrap',
-                            }} title={c().summary}>
+                          <div
+                            style={{
+                              flex: "1",
+                              display: "flex",
+                              "flex-direction": "column",
+                              gap: "4px",
+                              "min-width": "0",
+                            }}
+                          >
+                            <span
+                              style={{
+                                "font-family": '"Geist Sans", sans-serif',
+                                "font-size": "13px",
+                                "font-weight": isSelected() ? "500" : "normal",
+                                color: isSelected()
+                                  ? "var(--gs-text-primary)"
+                                  : "var(--gs-text-secondary)",
+                                overflow: "hidden",
+                                "text-overflow": "ellipsis",
+                                "white-space": "nowrap",
+                              }}
+                              title={c().summary}
+                            >
                               {c().summary}
                             </span>
-                            <div style={{ display: 'flex', 'align-items': 'center', gap: '10px' }}>
-                              <span style={{
-                                'font-family': '"JetBrains Mono", "Fira Code", "Cascadia Code", monospace',
-                                'font-size': '11px',
-                                'font-weight': isSelected() ? '500' : 'normal',
-                                color: isSelected() ? '#FF8400' : 'var(--gs-text-muted)',
-                                'flex-shrink': '0',
-                              }}>
+                            <div style={{ display: "flex", "align-items": "center", gap: "10px" }}>
+                              <span
+                                style={{
+                                  "font-family":
+                                    '"JetBrains Mono", "Fira Code", "Cascadia Code", monospace',
+                                  "font-size": "11px",
+                                  "font-weight": isSelected() ? "500" : "normal",
+                                  color: isSelected() ? "#FF8400" : "var(--gs-text-muted)",
+                                  "flex-shrink": "0",
+                                }}
+                              >
                                 {shortHash(c().id)}
                               </span>
-                              <span style={{
-                                'font-family': '"Geist Sans", sans-serif',
-                                'font-size': '11px',
-                                color: 'var(--gs-text-muted)',
-                                overflow: 'hidden', 'text-overflow': 'ellipsis', 'white-space': 'nowrap',
-                              }}>
+                              <span
+                                style={{
+                                  "font-family": '"Geist Sans", sans-serif',
+                                  "font-size": "11px",
+                                  color: "var(--gs-text-muted)",
+                                  overflow: "hidden",
+                                  "text-overflow": "ellipsis",
+                                  "white-space": "nowrap",
+                                }}
+                              >
                                 {c().author_name}
                               </span>
-                              <span style={{
-                                'font-family': '"Geist Sans", sans-serif',
-                                'font-size': '11px',
-                                color: 'var(--gs-text-muted)',
-                                'flex-shrink': '0',
-                              }}>
+                              <span
+                                style={{
+                                  "font-family": '"Geist Sans", sans-serif',
+                                  "font-size": "11px",
+                                  color: "var(--gs-text-muted)",
+                                  "flex-shrink": "0",
+                                }}
+                              >
                                 {formatTime(c().timestamp)}
                               </span>
                             </div>
@@ -462,46 +489,80 @@ const CommitGraph: Component<CommitGraphProps> = (props) => {
 
                           {/* Ref badges (branches + tags) */}
                           <Show when={branches().length > 0}>
-                            <div style={{
-                              display: 'flex', 'align-items': 'center', gap: '6px', 'flex-shrink': '0',
-                            }}>
+                            <div
+                              style={{
+                                display: "flex",
+                                "align-items": "center",
+                                gap: "6px",
+                                "flex-shrink": "0",
+                              }}
+                            >
                               <For each={branches()}>
                                 {(refName) => {
-                                  const isTag = refName.startsWith('tag:');
+                                  const isTag = refName.startsWith("tag:");
                                   const isRemote = !isTag && isRemoteBranch(refName);
-                                  const localName = isRemote ? getLocalBranchName(refName) : refName;
+                                  const localName = isRemote
+                                    ? getLocalBranchName(refName)
+                                    : refName;
                                   const color = isTag ? TAG_COLOR : getBranchColor(refName);
 
                                   // If remote branch has a matching local branch on the same commit,
                                   // only show the cloud icon (no text)
-                                  const hasLocalCounterpart = isRemote && branches().some(
-                                    (b) => !b.startsWith('tag:') && !isRemoteBranch(b) && b === localName
-                                  );
-                                  const displayName = isTag ? refName.slice(4) : (hasLocalCounterpart ? '' : (isRemote ? localName : refName));
+                                  const hasLocalCounterpart =
+                                    isRemote &&
+                                    branches().some(
+                                      (b) =>
+                                        !b.startsWith("tag:") &&
+                                        !isRemoteBranch(b) &&
+                                        b === localName,
+                                    );
+                                  const displayName = isTag
+                                    ? refName.slice(4)
+                                    : hasLocalCounterpart
+                                      ? ""
+                                      : isRemote
+                                        ? localName
+                                        : refName;
 
                                   return (
                                     <span
                                       style={{
-                                        display: 'inline-flex', 'align-items': 'center', gap: '4px',
-                                        height: '22px',
-                                        padding: hasLocalCounterpart ? '0 5px' : '0 8px',
-                                        'border-radius': '11px',
-                                        'background-color': color + '18',
+                                        display: "inline-flex",
+                                        "align-items": "center",
+                                        gap: "4px",
+                                        height: "22px",
+                                        padding: hasLocalCounterpart ? "0 5px" : "0 8px",
+                                        "border-radius": "11px",
+                                        "background-color": color + "18",
                                         color: color,
-                                        'font-family': '"JetBrains Mono", "Fira Code", "Cascadia Code", monospace',
-                                        'font-size': '10px', 'font-weight': '500',
-                                        'max-width': hasLocalCounterpart ? 'none' : '120px',
-                                        'white-space': 'nowrap',
+                                        "font-family":
+                                          '"JetBrains Mono", "Fira Code", "Cascadia Code", monospace',
+                                        "font-size": "10px",
+                                        "font-weight": "500",
+                                        "max-width": hasLocalCounterpart ? "none" : "120px",
+                                        "white-space": "nowrap",
                                       }}
                                       title={isTag ? refName.slice(4) : refName}
                                     >
-                                      {isTag && <span style={{ display: 'flex', 'flex-shrink': '0' }}><TagIcon size={10} /></span>}
-                                      {isRemote && <span style={{ display: 'flex', 'flex-shrink': '0' }}><Cloud size={10} /></span>}
+                                      {isTag && (
+                                        <span style={{ display: "flex", "flex-shrink": "0" }}>
+                                          <TagIcon size={10} />
+                                        </span>
+                                      )}
+                                      {isRemote && (
+                                        <span style={{ display: "flex", "flex-shrink": "0" }}>
+                                          <Cloud size={10} />
+                                        </span>
+                                      )}
                                       {displayName && (
-                                        <span style={{
-                                          overflow: 'hidden', 'text-overflow': 'ellipsis',
-                                          'white-space': 'nowrap', 'min-width': '0',
-                                        }}>
+                                        <span
+                                          style={{
+                                            overflow: "hidden",
+                                            "text-overflow": "ellipsis",
+                                            "white-space": "nowrap",
+                                            "min-width": "0",
+                                          }}
+                                        >
                                           {displayName}
                                         </span>
                                       )}

@@ -24,7 +24,7 @@ pub async fn get_commit_log(
 ) -> Result<Vec<CommitInfo>, AppError> {
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.log(limit.unwrap_or(200), all.unwrap_or(true))
+    repo.log(limit.unwrap_or(200), all.unwrap_or(true)).await
 }
 
 // ==================== Phase 1: Amend & Undo ====================
@@ -71,7 +71,7 @@ pub async fn get_commit_diff(
 ) -> Result<DiffOutput, AppError> {
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.commit_diff(&commit_id)
+    repo.commit_diff(&commit_id).await
 }
 
 #[tauri::command]
@@ -82,7 +82,7 @@ pub async fn get_file_history(
 ) -> Result<Vec<CommitInfo>, AppError> {
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.file_log(&path, limit.unwrap_or(50))
+    repo.file_log(&path, limit.unwrap_or(50)).await
 }
 
 #[tauri::command]
@@ -93,7 +93,7 @@ pub async fn search_commits(
 ) -> Result<Vec<CommitInfo>, AppError> {
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.search_commits(&query, limit.unwrap_or(50))
+    repo.search_commits(&query, limit.unwrap_or(50)).await
 }
 
 #[tauri::command]
@@ -104,7 +104,7 @@ pub async fn get_commit_log_paged(
 ) -> Result<Vec<CommitInfo>, AppError> {
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.log_paged(max_count, skip)
+    repo.log_paged(max_count, skip).await
 }
 
 #[tauri::command]
@@ -116,5 +116,5 @@ pub async fn get_branch_log(
 ) -> Result<Vec<CommitInfo>, AppError> {
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.log_branch(&branch, limit.unwrap_or(200), first_parent.unwrap_or(false))
+    repo.log_branch(&branch, limit.unwrap_or(200), first_parent.unwrap_or(false)).await
 }

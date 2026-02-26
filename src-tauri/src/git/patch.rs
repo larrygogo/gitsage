@@ -5,13 +5,8 @@ pub fn generate_hunk_patch(file_path: &str, hunk: &DiffHunk, reverse: bool) -> S
     let mut patch = String::new();
 
     // Diff header
-    if reverse {
-        patch.push_str(&format!("--- a/{}\n", file_path));
-        patch.push_str(&format!("+++ b/{}\n", file_path));
-    } else {
-        patch.push_str(&format!("--- a/{}\n", file_path));
-        patch.push_str(&format!("+++ b/{}\n", file_path));
-    }
+    patch.push_str(&format!("--- a/{}\n", file_path));
+    patch.push_str(&format!("+++ b/{}\n", file_path));
 
     // Hunk header
     if reverse {

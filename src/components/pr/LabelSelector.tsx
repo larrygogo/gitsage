@@ -2,6 +2,7 @@ import { type Component, createSignal, Show, For, onMount } from "solid-js";
 import { Button } from "@/components/ui";
 import { useGitHub } from "@/stores/github";
 import * as githubService from "@/services/github";
+import { logger } from "@/utils/logger";
 import type { LabelInfo } from "@/types";
 
 export interface LabelSelectorProps {
@@ -46,7 +47,7 @@ export const LabelSelector: Component<LabelSelectorProps> = (props) => {
       const currentLabels = ghState.currentPull?.labels ?? [];
       setSelectedLabels(new Set(currentLabels.map((l) => l.name)));
     } catch (err) {
-      console.error("[LabelSelector] 加载标签失败:", err);
+      logger.error("LabelSelector", "加载标签失败:", err);
     } finally {
       setLoading(false);
     }
@@ -88,18 +89,20 @@ export const LabelSelector: Component<LabelSelectorProps> = (props) => {
       await ghActions.loadPullDetail(props.prNumber);
       props.onClose();
     } catch (err) {
-      console.error("[LabelSelector] 更新标签失败:", err);
+      logger.error("LabelSelector", "更新标签失败:", err);
     }
   };
 
   return (
-    <div style={{
-      "margin-top": "8px",
-      padding: "12px",
-      "background-color": "var(--gs-bg-primary)",
-      border: "1px solid var(--gs-border-secondary)",
-      "border-radius": "6px",
-    }}>
+    <div
+      style={{
+        "margin-top": "8px",
+        padding: "12px",
+        "background-color": "var(--gs-bg-primary)",
+        border: "1px solid var(--gs-border-secondary)",
+        "border-radius": "6px",
+      }}
+    >
       <Show when={loading()}>
         <div style={{ "font-size": "12px", color: "var(--gs-text-muted)" }}>加载标签中...</div>
       </Show>
@@ -129,13 +132,15 @@ export const LabelSelector: Component<LabelSelectorProps> = (props) => {
                   }}
                   onClick={() => toggleLabel(label.name)}
                 >
-                  <span style={{
-                    width: "8px",
-                    height: "8px",
-                    "border-radius": "50%",
-                    "background-color": `#${label.color}`,
-                    "flex-shrink": "0",
-                  }} />
+                  <span
+                    style={{
+                      width: "8px",
+                      height: "8px",
+                      "border-radius": "50%",
+                      "background-color": `#${label.color}`,
+                      "flex-shrink": "0",
+                    }}
+                  />
                   {label.name}
                 </button>
               );
@@ -144,8 +149,12 @@ export const LabelSelector: Component<LabelSelectorProps> = (props) => {
         </div>
 
         <div style={{ display: "flex", gap: "6px", "justify-content": "flex-end" }}>
-          <Button variant="ghost" size="sm" onClick={props.onClose}>取消</Button>
-          <Button variant="primary" size="sm" onClick={handleApply}>应用</Button>
+          <Button variant="ghost" size="sm" onClick={props.onClose}>
+            取消
+          </Button>
+          <Button variant="primary" size="sm" onClick={handleApply}>
+            应用
+          </Button>
         </div>
       </Show>
     </div>

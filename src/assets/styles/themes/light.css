@@ -5,69 +5,69 @@
 
 [data-theme="light"] {
   /* ========== 背景色 ========== */
-  --gs-bg-primary: #F5F5F0;
-  --gs-bg-secondary: #F0F0EB;
-  --gs-bg-tertiary: #E4E4DF;
+  --gs-bg-primary: #f5f5f0;
+  --gs-bg-secondary: #f0f0eb;
+  --gs-bg-tertiary: #e4e4df;
 
   /* ========== 文字色 ========== */
-  --gs-text-primary: #1A1A1A;
-  --gs-text-secondary: #4A4A46;
-  --gs-text-muted: #9E9E99;
+  --gs-text-primary: #1a1a1a;
+  --gs-text-secondary: #4a4a46;
+  --gs-text-muted: #9e9e99;
 
   /* ========== 边框色 ========== */
-  --gs-border-primary: #E8E8E3;
-  --gs-border-secondary: #E8E8E3;
-  --gs-border-focus: #FF8400;
+  --gs-border-primary: #e8e8e3;
+  --gs-border-secondary: #e8e8e3;
+  --gs-border-focus: #ff8400;
 
   /* ========== 强调色 / 品牌色（橙色系） ========== */
-  --gs-accent-primary: #FF8400;
-  --gs-accent-hover: #FF6B00;
-  --gs-accent-active: #E67800;
-  --gs-accent-subtle: #E4E4DF;
-  --gs-accent-text: #FF8400;
+  --gs-accent-primary: #ff8400;
+  --gs-accent-hover: #ff6b00;
+  --gs-accent-active: #e67800;
+  --gs-accent-subtle: #e4e4df;
+  --gs-accent-text: #ff8400;
 
   /* ========== 语义色 - 成功 ========== */
-  --gs-success-bg: #10B98115;
+  --gs-success-bg: #10b98115;
   --gs-success-text: #059669;
-  --gs-success-border: #10B981;
-  --gs-success-solid: #10B981;
+  --gs-success-border: #10b981;
+  --gs-success-solid: #10b981;
 
   /* ========== 语义色 - 警告 ========== */
-  --gs-warning-bg: #F59E0B15;
-  --gs-warning-text: #D97706;
-  --gs-warning-border: #F59E0B;
-  --gs-warning-solid: #F59E0B;
+  --gs-warning-bg: #f59e0b15;
+  --gs-warning-text: #d97706;
+  --gs-warning-border: #f59e0b;
+  --gs-warning-solid: #f59e0b;
 
   /* ========== 语义色 - 错误 ========== */
-  --gs-error-bg: #EF444415;
-  --gs-error-text: #DC2626;
-  --gs-error-border: #EF4444;
-  --gs-error-solid: #EF4444;
+  --gs-error-bg: #ef444415;
+  --gs-error-text: #dc2626;
+  --gs-error-border: #ef4444;
+  --gs-error-solid: #ef4444;
 
   /* ========== Diff 专用色 ========== */
   /* Added（绿） */
-  --gs-diff-added-bg: #10B98115;
+  --gs-diff-added-bg: #10b98115;
   --gs-diff-added-text: #059669;
-  --gs-diff-added-line-bg: #10B98120;
-  --gs-diff-added-word-bg: #10B98130;
+  --gs-diff-added-line-bg: #10b98120;
+  --gs-diff-added-word-bg: #10b98130;
 
   /* Deleted（红） */
-  --gs-diff-deleted-bg: #EF444415;
-  --gs-diff-deleted-text: #DC2626;
-  --gs-diff-deleted-line-bg: #EF444420;
-  --gs-diff-deleted-word-bg: #EF444430;
+  --gs-diff-deleted-bg: #ef444415;
+  --gs-diff-deleted-text: #dc2626;
+  --gs-diff-deleted-line-bg: #ef444420;
+  --gs-diff-deleted-word-bg: #ef444430;
 
   /* Modified（橙） */
-  --gs-diff-modified-bg: #FF840015;
-  --gs-diff-modified-text: #FF8400;
-  --gs-diff-modified-line-bg: #FF840020;
-  --gs-diff-modified-word-bg: #FF840030;
+  --gs-diff-modified-bg: #ff840015;
+  --gs-diff-modified-text: #ff8400;
+  --gs-diff-modified-line-bg: #ff840020;
+  --gs-diff-modified-word-bg: #ff840030;
 
   /* Diff 行号与分隔 */
-  --gs-diff-hunk-bg: #E4E4DF;
-  --gs-diff-hunk-text: #9E9E99;
-  --gs-diff-line-number: #9E9E99;
-  --gs-diff-gutter-bg: #F0F0EB;
+  --gs-diff-hunk-bg: #e4e4df;
+  --gs-diff-hunk-text: #9e9e99;
+  --gs-diff-line-number: #9e9e99;
+  --gs-diff-gutter-bg: #f0f0eb;
 
   /* ========== 阴影 ========== */
   --gs-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
@@ -75,18 +75,30 @@
   --gs-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 
   /* ========== 表面色（Welcome 等面板） ========== */
-  --gs-surface-elevated: #FFFFFF;
-  --gs-border-subtle: #D4D4CF;
-  --gs-text-dim: #8C8C88;
+  --gs-surface-elevated: #ffffff;
+  --gs-border-subtle: #d4d4cf;
+  --gs-text-dim: #8c8c88;
 
   /* ========== 菜单 ========== */
-  --gs-menu-bg: #FFFFFF;
-  --gs-menu-border: #E8E8E3;
-  --gs-menu-hover-bg: #FF840012;
+  --gs-menu-bg: #ffffff;
+  --gs-menu-border: #e8e8e3;
+  --gs-menu-hover-bg: #ff840012;
   --gs-menu-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 
+  /* ========== 圆角 ========== */
+  --gs-radius-sm: 4px;
+  --gs-radius-md: 6px;
+  --gs-radius-lg: 8px;
+
+  /* ========== 语义色 - 危险（按钮/输入框专用） ========== */
+  --gs-color-danger: #ef4444;
+  --gs-color-danger-hover: #dc2626;
+  --gs-color-danger-active: #b91c1c;
+  --gs-color-danger-foreground: #ffffff;
+  --gs-color-danger-ring: rgba(239, 68, 68, 0.2);
+
   /* ========== 滚动条 ========== */
-  --gs-scrollbar-track: #F0F0EB;
-  --gs-scrollbar-thumb: #D0D0CB;
-  --gs-scrollbar-thumb-hover: #B0B0AB;
+  --gs-scrollbar-track: #f0f0eb;
+  --gs-scrollbar-thumb: #d0d0cb;
+  --gs-scrollbar-thumb-hover: #b0b0ab;
 }

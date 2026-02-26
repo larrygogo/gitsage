@@ -46,7 +46,7 @@ pub async fn stash_drop(
 pub async fn stash_list(state: State<'_, AppState>) -> Result<Vec<StashEntry>, AppError> {
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.stash_list()
+    repo.stash_list().await
 }
 
 #[tauri::command]

@@ -1,4 +1,12 @@
-import { type Component, createSignal, createEffect, Show, For, onMount, onCleanup } from "solid-js";
+import {
+  type Component,
+  createSignal,
+  createEffect,
+  Show,
+  For,
+  onMount,
+  onCleanup,
+} from "solid-js";
 import History from "lucide-solid/icons/history";
 import Search from "lucide-solid/icons/search";
 import FilterIcon from "lucide-solid/icons/filter";
@@ -7,34 +15,9 @@ import { CommitGraph } from "@/components/graph";
 import { useI18n } from "@/i18n";
 import type { CommitInfo, DiffOutput, BranchInfo } from "@/types";
 import * as gitService from "@/services/git";
+import { shortHash } from "@/utils/format";
+import { logger } from "@/utils/logger";
 import styles from "./HistoryView.module.css";
-
-function formatTime(timestamp: number): string {
-  const date = new Date(timestamp * 1000);
-  const now = Date.now();
-  const diff = now - date.getTime();
-
-  const seconds = Math.floor(diff / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-
-  if (days > 7) {
-    return date.toLocaleDateString("zh-CN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
-  }
-  if (days > 0) return `${days} days ago`;
-  if (hours > 0) return `${hours} hours ago`;
-  if (minutes > 0) return `${minutes} min ago`;
-  return "just now";
-}
-
-function shortHash(id: string): string {
-  return id.slice(0, 7);
-}
 
 export interface HistoryViewProps {
   onCherryPick?: (commitId: string) => Promise<void>;
@@ -53,7 +36,11 @@ const HistoryView: Component<HistoryViewProps> = (props) => {
   const [showResetDialog, setShowResetDialog] = createSignal(false);
   const [resetTargetId, setResetTargetId] = createSignal("");
   const [resetMode, setResetMode] = createSignal("mixed");
-  const [contextMenu, setContextMenu] = createSignal<{ x: number; y: number; commit: CommitInfo } | null>(null);
+  const [contextMenu, setContextMenu] = createSignal<{
+    x: number;
+    y: number;
+    commit: CommitInfo;
+  } | null>(null);
   const [branches, setBranches] = createSignal<BranchInfo[]>([]);
   const [selectedBranches, setSelectedBranches] = createSignal<Set<string>>(new Set());
   const [branchTips, setBranchTips] = createSignal<Record<string, string[]>>({});
@@ -120,7 +107,7 @@ const HistoryView: Component<HistoryViewProps> = (props) => {
       const sel = selectedBranches();
       if (sel.size > 0) {
         const allLogs = await Promise.all(
-          Array.from(sel).map((b) => gitService.getBranchLog(b, 200, true))
+          Array.from(sel).map((b) => gitService.getBranchLog(b, 200, true)),
         );
         const seen = new Set<string>();
         const merged: CommitInfo[] = [];
@@ -143,7 +130,7 @@ const HistoryView: Component<HistoryViewProps> = (props) => {
         setCommits(log);
       }
     } catch (err) {
-      console.error("[HistoryView] Failed to load commits:", err);
+      logger.error("HistoryView", "Failed to load commits:", err);
       setCommits([]);
     } finally {
       setLoading(false);
@@ -154,7 +141,7 @@ const HistoryView: Component<HistoryViewProps> = (props) => {
     const [, branchList, tips] = await Promise.all([
       loadCommits(),
       gitService.getBranches().catch(() => [] as BranchInfo[]),
-      gitService.getBranchTips().catch(() => ({} as Record<string, string[]>)),
+      gitService.getBranchTips().catch(() => ({}) as Record<string, string[]>),
     ]);
     setBranches(branchList);
     setBranchTips(tips);
@@ -171,7 +158,7 @@ const HistoryView: Component<HistoryViewProps> = (props) => {
       const results = await gitService.searchCommits(query, 200);
       setCommits(results);
     } catch (err) {
-      console.error("[HistoryView] Search failed:", err);
+      logger.error("HistoryView", "Search failed:", err);
     } finally {
       setLoading(false);
     }
@@ -183,7 +170,7 @@ const HistoryView: Component<HistoryViewProps> = (props) => {
       const diff = await gitService.getCommitDiff(commit.id);
       setCommitDiff(diff);
     } catch (err) {
-      console.error("[HistoryView] Failed to load commit diff:", err);
+      logger.error("HistoryView", "Failed to load commit diff:", err);
       setCommitDiff(null);
     }
   };
@@ -214,7 +201,9 @@ const HistoryView: Component<HistoryViewProps> = (props) => {
         <div class={styles.topBarLeft}>
           <span class={styles.topBarTitle}>{t("history.title")}</span>
           <Show when={!loading()}>
-            <span class={styles.topBarBadge}>{commits().length} {t("history.commits")}</span>
+            <span class={styles.topBarBadge}>
+              {commits().length} {t("history.commits")}
+            </span>
           </Show>
         </div>
         <div class={styles.topBarRight}>
@@ -223,13 +212,19 @@ const HistoryView: Component<HistoryViewProps> = (props) => {
             <span>{t("history.searchPlaceholder")}</span>
           </button>
           <div ref={dropdownRef} style={{ position: "relative" }}>
-            <button class={styles.topBarBtn} onClick={() => setBranchDropdownOpen(!branchDropdownOpen())}>
+            <button
+              class={styles.topBarBtn}
+              onClick={() => setBranchDropdownOpen(!branchDropdownOpen())}
+            >
               <FilterIcon size={14} />
               <span>{branchSelectLabel()}</span>
               <Show when={selectedBranches().size > 0}>
                 <span
                   class={styles.clearFilterBtn}
-                  onClick={(e) => { e.stopPropagation(); clearBranchSelection(); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    clearBranchSelection();
+                  }}
                 >
                   <X size={12} />
                 </span>
@@ -237,9 +232,9 @@ const HistoryView: Component<HistoryViewProps> = (props) => {
             </button>
             <Show when={branchDropdownOpen()}>
               <div class={styles.filterDropdown}>
-                <Show when={branches().filter(b => !b.is_remote).length > 0}>
+                <Show when={branches().filter((b) => !b.is_remote).length > 0}>
                   <div class={styles.filterGroupLabel}>LOCAL</div>
-                  <For each={branches().filter(b => !b.is_remote)}>
+                  <For each={branches().filter((b) => !b.is_remote)}>
                     {(b) => (
                       <label class={styles.filterItem}>
                         <input
@@ -252,12 +247,12 @@ const HistoryView: Component<HistoryViewProps> = (props) => {
                     )}
                   </For>
                 </Show>
-                <Show when={branches().filter(b => b.is_remote).length > 0}>
-                  <Show when={branches().filter(b => !b.is_remote).length > 0}>
+                <Show when={branches().filter((b) => b.is_remote).length > 0}>
+                  <Show when={branches().filter((b) => !b.is_remote).length > 0}>
                     <div class={styles.filterDivider} />
                   </Show>
                   <div class={styles.filterGroupLabel}>REMOTE</div>
-                  <For each={branches().filter(b => b.is_remote)}>
+                  <For each={branches().filter((b) => b.is_remote)}>
                     {(b) => (
                       <label class={styles.filterItem}>
                         <input
@@ -311,7 +306,9 @@ const HistoryView: Component<HistoryViewProps> = (props) => {
           when={commits().length > 0}
           fallback={
             <div class={styles.emptyState}>
-              <span class={styles.emptyIcon}><History size={36} /></span>
+              <span class={styles.emptyIcon}>
+                <History size={36} />
+              </span>
               <span class={styles.emptyText}>{t("history.noCommits")}</span>
             </div>
           }
@@ -346,7 +343,10 @@ const HistoryView: Component<HistoryViewProps> = (props) => {
                     <span class={styles.detailTitle}>{t("history.commitDetails")}</span>
                     <button
                       class={styles.detailCloseBtn}
-                      onClick={() => { setSelectedCommit(null); setCommitDiff(null); }}
+                      onClick={() => {
+                        setSelectedCommit(null);
+                        setCommitDiff(null);
+                      }}
                     >
                       <X size={14} />
                     </button>
@@ -375,8 +375,8 @@ const HistoryView: Component<HistoryViewProps> = (props) => {
                       {(diff) => (
                         <div>
                           <div class={styles.detailDiffStats}>
-                            {diff().stats.files_changed} files changed,
-                            +{diff().stats.insertions} -{diff().stats.deletions}
+                            {diff().stats.files_changed} files changed, +{diff().stats.insertions} -
+                            {diff().stats.deletions}
                           </div>
                           <For each={diff().files}>
                             {(file) => (
@@ -390,12 +390,21 @@ const HistoryView: Component<HistoryViewProps> = (props) => {
                                       <div class={styles.detailHunkHeader}>{hunk.header}</div>
                                       <For each={hunk.lines}>
                                         {(line) => (
-                                          <div class={`${styles.detailDiffLine} ${
-                                            line.origin === "Addition" ? styles.detailDiffLineAdd :
-                                            line.origin === "Deletion" ? styles.detailDiffLineDel : ""
-                                          }`}>
+                                          <div
+                                            class={`${styles.detailDiffLine} ${
+                                              line.origin === "Addition"
+                                                ? styles.detailDiffLineAdd
+                                                : line.origin === "Deletion"
+                                                  ? styles.detailDiffLineDel
+                                                  : ""
+                                            }`}
+                                          >
                                             <span class={styles.detailDiffLinePrefix}>
-                                              {line.origin === "Addition" ? "+" : line.origin === "Deletion" ? "-" : " "}
+                                              {line.origin === "Addition"
+                                                ? "+"
+                                                : line.origin === "Deletion"
+                                                  ? "-"
+                                                  : " "}
                                             </span>
                                             <span>{line.content}</span>
                                           </div>
@@ -428,13 +437,19 @@ const HistoryView: Component<HistoryViewProps> = (props) => {
           >
             <button
               class={styles.contextMenuItem}
-              onClick={() => { props.onCherryPick?.(menu().commit.id); closeContextMenu(); }}
+              onClick={() => {
+                props.onCherryPick?.(menu().commit.id);
+                closeContextMenu();
+              }}
             >
               {t("history.cherryPick")}
             </button>
             <button
               class={styles.contextMenuItem}
-              onClick={() => { props.onRevert?.(menu().commit.id); closeContextMenu(); }}
+              onClick={() => {
+                props.onRevert?.(menu().commit.id);
+                closeContextMenu();
+              }}
             >
               {t("history.revert")}
             </button>
@@ -454,11 +469,15 @@ const HistoryView: Component<HistoryViewProps> = (props) => {
         <div class={styles.dialogOverlay}>
           <div class={styles.dialogBox}>
             <h3 class={styles.dialogTitle}>{t("history.resetTitle")}</h3>
-            <p class={styles.dialogSubtitle}>{t("history.resetTarget")}: {shortHash(resetTargetId())}</p>
+            <p class={styles.dialogSubtitle}>
+              {t("history.resetTarget")}: {shortHash(resetTargetId())}
+            </p>
             <div class={styles.dialogOptions}>
               <label class={styles.dialogOption}>
                 <input
-                  type="radio" name="resetMode" value="soft"
+                  type="radio"
+                  name="resetMode"
+                  value="soft"
                   checked={resetMode() === "soft"}
                   onChange={() => setResetMode("soft")}
                 />
@@ -466,7 +485,9 @@ const HistoryView: Component<HistoryViewProps> = (props) => {
               </label>
               <label class={styles.dialogOption}>
                 <input
-                  type="radio" name="resetMode" value="mixed"
+                  type="radio"
+                  name="resetMode"
+                  value="mixed"
                   checked={resetMode() === "mixed"}
                   onChange={() => setResetMode("mixed")}
                 />
@@ -474,7 +495,9 @@ const HistoryView: Component<HistoryViewProps> = (props) => {
               </label>
               <label class={styles.dialogOption}>
                 <input
-                  type="radio" name="resetMode" value="hard"
+                  type="radio"
+                  name="resetMode"
+                  value="hard"
                   checked={resetMode() === "hard"}
                   onChange={() => setResetMode("hard")}
                 />

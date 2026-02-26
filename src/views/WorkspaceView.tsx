@@ -13,8 +13,15 @@ import X from "lucide-solid/icons/x";
 import { Button } from "@/components/ui";
 import SplitPane from "@/components/ui/SplitPane";
 import { useI18n } from "@/i18n";
-import type { FileStatus, FileStatusKind, DiffOutput, StashEntry, RepoOperationState } from "@/types";
+import type {
+  FileStatus,
+  FileStatusKind,
+  DiffOutput,
+  StashEntry,
+  RepoOperationState,
+} from "@/types";
 import * as gitService from "@/services/git";
+import { logger } from "@/utils/logger";
 import styles from "./WorkspaceView.module.css";
 
 /* ── 树形视图数据结构 ── */
@@ -153,9 +160,9 @@ const WorkspaceView: Component<WorkspaceViewProps> = (props) => {
     }
   });
 
-  const stagedFiles = () => files().filter((f) => f.staged);
-  const unstagedFiles = () => files().filter((f) => !f.staged);
-  const totalChanges = () => files().length;
+  const stagedFiles = createMemo(() => files().filter((f) => f.staged));
+  const unstagedFiles = createMemo(() => files().filter((f) => !f.staged));
+  const totalChanges = createMemo(() => files().length);
   const repoState = () => props.repoState ?? "Normal";
   const stashes = () => props.stashes ?? [];
   const isInOperation = () => repoState() !== "Normal";
@@ -195,11 +202,16 @@ const WorkspaceView: Component<WorkspaceViewProps> = (props) => {
 
   const operationLabel = (): string => {
     switch (repoState()) {
-      case "Merging": return t("workspace.operation.merging");
-      case "Rebasing": return t("workspace.operation.rebasing");
-      case "CherryPicking": return t("workspace.operation.cherryPicking");
-      case "Reverting": return t("workspace.operation.reverting");
-      default: return "";
+      case "Merging":
+        return t("workspace.operation.merging");
+      case "Rebasing":
+        return t("workspace.operation.rebasing");
+      case "CherryPicking":
+        return t("workspace.operation.cherryPicking");
+      case "Reverting":
+        return t("workspace.operation.reverting");
+      default:
+        return "";
     }
   };
 
@@ -214,7 +226,7 @@ const WorkspaceView: Component<WorkspaceViewProps> = (props) => {
       const diff = await gitService.getDiff(file, selectedFileStaged());
       setDiffData(diff);
     } catch (err) {
-      console.error("[WorkspaceView] 加载 diff 失败:", err);
+      logger.error("WorkspaceView", "加载 diff 失败:", err);
       setDiffData(null);
     }
   });
@@ -239,7 +251,7 @@ const WorkspaceView: Component<WorkspaceViewProps> = (props) => {
     setIsGenerating(true);
     try {
       // TODO: 调用 AI service 生成 commit message
-      console.log("[WorkspaceView] AI generate commit message");
+      logger.debug("WorkspaceView", "AI generate commit message");
     } finally {
       setIsGenerating(false);
     }
@@ -296,7 +308,19 @@ const WorkspaceView: Component<WorkspaceViewProps> = (props) => {
       style={{ "padding-left": `${12 + indent * 16}px` }}
     >
       <button
-        style={{ flex: "1", display: "flex", "align-items": "center", gap: "10px", background: "none", border: "none", cursor: "pointer", color: "inherit", "text-align": "left", padding: "0", overflow: "hidden" }}
+        style={{
+          flex: "1",
+          display: "flex",
+          "align-items": "center",
+          gap: "10px",
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          color: "inherit",
+          "text-align": "left",
+          padding: "0",
+          overflow: "hidden",
+        }}
         onClick={() => handleSelectFile(file.path, isStaged)}
       >
         <span class={`${styles.fileDot} ${DOT_CLASS[file.status]}`} />
@@ -309,19 +333,25 @@ const WorkspaceView: Component<WorkspaceViewProps> = (props) => {
               class={styles.fileItemActionBtn}
               onClick={() => handleUnstageFile(file.path)}
               title={t("workspace.unstage")}
-            ><Minus size={12} /></button>
+            >
+              <Minus size={12} />
+            </button>
           ) : (
             <>
               <button
                 class={styles.fileItemActionBtn}
                 onClick={() => handleDiscardFile(file.path)}
                 title={t("workspace.discard")}
-              ><X size={12} /></button>
+              >
+                <X size={12} />
+              </button>
               <button
                 class={styles.fileItemActionBtn}
                 onClick={() => handleStageFile(file.path)}
                 title={t("workspace.stage")}
-              ><Plus size={12} /></button>
+              >
+                <Plus size={12} />
+              </button>
             </>
           )}
         </div>
@@ -351,26 +381,44 @@ const WorkspaceView: Component<WorkspaceViewProps> = (props) => {
                   {expanded() ? <FolderOpenIcon size={14} /> : <FolderIcon size={14} />}
                 </span>
                 <span class={styles.fileName}>{node.name}</span>
-                <span class={`${styles.fileStatusLabel} ${styles.statusM}`}>{countFiles(node)}</span>
+                <span class={`${styles.fileStatusLabel} ${styles.statusM}`}>
+                  {countFiles(node)}
+                </span>
                 <div class={styles.fileItemActions}>
                   {isStaged ? (
                     <button
                       class={styles.fileItemActionBtn}
-                      onClick={(e) => { e.stopPropagation(); props.onUnstageFiles?.(collectFilePaths(node)); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        props.onUnstageFiles?.(collectFilePaths(node));
+                      }}
                       title={t("workspace.unstageFolderTitle")}
-                    ><Minus size={12} /></button>
+                    >
+                      <Minus size={12} />
+                    </button>
                   ) : (
                     <>
                       <button
                         class={styles.fileItemActionBtn}
-                        onClick={(e) => { e.stopPropagation(); setDiscardTarget(collectFilePaths(node)); setShowDiscardConfirm(true); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDiscardTarget(collectFilePaths(node));
+                          setShowDiscardConfirm(true);
+                        }}
                         title={t("workspace.discardFolderTitle")}
-                      ><X size={12} /></button>
+                      >
+                        <X size={12} />
+                      </button>
                       <button
                         class={styles.fileItemActionBtn}
-                        onClick={(e) => { e.stopPropagation(); props.onStageFiles?.(collectFilePaths(node)); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          props.onStageFiles?.(collectFilePaths(node));
+                        }}
                         title={t("workspace.stageFolderTitle")}
-                      ><Plus size={12} /></button>
+                      >
+                        <Plus size={12} />
+                      </button>
                     </>
                   )}
                 </div>
@@ -437,9 +485,13 @@ const WorkspaceView: Component<WorkspaceViewProps> = (props) => {
             </Button>
           </Show>
           <Show when={repoState() === "CherryPicking" || repoState() === "Reverting"}>
-            <Button variant="ghost" size="sm" onClick={() => {
-              // cherry-pick / revert abort
-            }}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                // cherry-pick / revert abort
+              }}
+            >
               {t("workspace.operation.abort")}
             </Button>
             <Button variant="primary" size="sm" onClick={() => props.onMergeContinue?.()}>
@@ -468,7 +520,16 @@ const WorkspaceView: Component<WorkspaceViewProps> = (props) => {
             }}
           />
           <div class={styles.commitActions}>
-            <label style={{ display: "flex", "align-items": "center", gap: "4px", "font-size": "12px", color: "var(--gs-text-secondary)", cursor: "pointer" }}>
+            <label
+              style={{
+                display: "flex",
+                "align-items": "center",
+                gap: "4px",
+                "font-size": "12px",
+                color: "var(--gs-text-secondary)",
+                cursor: "pointer",
+              }}
+            >
               <input
                 type="checkbox"
                 checked={amendMode()}
@@ -476,11 +537,7 @@ const WorkspaceView: Component<WorkspaceViewProps> = (props) => {
               />
               {t("workspace.amendCommit")}
             </label>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => props.onUndoCommit?.(true)}
-            >
+            <Button variant="ghost" size="sm" onClick={() => props.onUndoCommit?.(true)}>
               {t("workspace.undoCommit")}
             </Button>
             <Button
@@ -523,17 +580,29 @@ const WorkspaceView: Component<WorkspaceViewProps> = (props) => {
                 <div class={styles.groupActions}>
                   <button
                     class={styles.viewModeBtn}
-                    onClick={(e) => { e.stopPropagation(); toggleViewMode(); }}
-                    title={viewMode() === "list" ? t("workspace.switchToTree") : t("workspace.switchToList")}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleViewMode();
+                    }}
+                    title={
+                      viewMode() === "list"
+                        ? t("workspace.switchToTree")
+                        : t("workspace.switchToList")
+                    }
                   >
                     {viewMode() === "list" ? <ListIcon size={14} /> : <FolderTree size={14} />}
                   </button>
                   <Show when={stagedFiles().length > 0}>
                     <button
                       class={styles.groupActionBtn}
-                      onClick={(e) => { e.stopPropagation(); handleUnstageAll(); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleUnstageAll();
+                      }}
                       title={t("workspace.unstageAll")}
-                    ><Minus size={14} /></button>
+                    >
+                      <Minus size={14} />
+                    </button>
                   </Show>
                 </div>
               </div>
@@ -546,9 +615,7 @@ const WorkspaceView: Component<WorkspaceViewProps> = (props) => {
                     <Show
                       when={viewMode() === "tree"}
                       fallback={
-                        <For each={stagedFiles()}>
-                          {(file) => renderFileItem(file, true)}
-                        </For>
+                        <For each={stagedFiles()}>{(file) => renderFileItem(file, true)}</For>
                       }
                     >
                       {renderTreeNodes(stagedTree(), 0, true)}
@@ -574,22 +641,39 @@ const WorkspaceView: Component<WorkspaceViewProps> = (props) => {
                 <div class={styles.groupActions}>
                   <button
                     class={styles.viewModeBtn}
-                    onClick={(e) => { e.stopPropagation(); toggleViewMode(); }}
-                    title={viewMode() === "list" ? t("workspace.switchToTree") : t("workspace.switchToList")}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleViewMode();
+                    }}
+                    title={
+                      viewMode() === "list"
+                        ? t("workspace.switchToTree")
+                        : t("workspace.switchToList")
+                    }
                   >
                     {viewMode() === "list" ? <ListIcon size={14} /> : <FolderTree size={14} />}
                   </button>
                   <Show when={unstagedFiles().length > 0}>
                     <button
                       class={styles.groupActionBtn}
-                      onClick={(e) => { e.stopPropagation(); handleDiscardAll(); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDiscardAll();
+                      }}
                       title={t("workspace.discardAll")}
-                    ><X size={14} /></button>
+                    >
+                      <X size={14} />
+                    </button>
                     <button
                       class={styles.groupActionBtn}
-                      onClick={(e) => { e.stopPropagation(); handleStageAll(); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStageAll();
+                      }}
                       title={t("workspace.stageAll")}
-                    ><Plus size={14} /></button>
+                    >
+                      <Plus size={14} />
+                    </button>
                   </Show>
                 </div>
               </div>
@@ -602,9 +686,7 @@ const WorkspaceView: Component<WorkspaceViewProps> = (props) => {
                     <Show
                       when={viewMode() === "tree"}
                       fallback={
-                        <For each={unstagedFiles()}>
-                          {(file) => renderFileItem(file, false)}
-                        </For>
+                        <For each={unstagedFiles()}>{(file) => renderFileItem(file, false)}</For>
                       }
                     >
                       {renderTreeNodes(unstagedTree(), 0, false)}
@@ -628,9 +710,14 @@ const WorkspaceView: Component<WorkspaceViewProps> = (props) => {
                 <div class={styles.groupActions}>
                   <button
                     class={styles.groupActionBtn}
-                    onClick={(e) => { e.stopPropagation(); props.onStashSave?.(); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      props.onStashSave?.();
+                    }}
                     title={t("workspace.stashSave")}
-                  ><Plus size={14} /></button>
+                  >
+                    <Plus size={14} />
+                  </button>
                 </div>
               </div>
               <Show when={stashesOpen() && stashes().length > 0}>
@@ -645,17 +732,23 @@ const WorkspaceView: Component<WorkspaceViewProps> = (props) => {
                           class={styles.stashActionBtn}
                           onClick={() => props.onStashApply?.(stash.index)}
                           title={t("workspace.stashApply")}
-                        >{t("workspace.stashApply")}</button>
+                        >
+                          {t("workspace.stashApply")}
+                        </button>
                         <button
                           class={styles.stashActionBtn}
                           onClick={() => props.onStashPop?.(stash.index)}
                           title={t("workspace.stashPop")}
-                        >{t("workspace.stashPop")}</button>
+                        >
+                          {t("workspace.stashPop")}
+                        </button>
                         <button
                           class={`${styles.stashActionBtn} ${styles.stashActionBtnDanger}`}
                           onClick={() => props.onStashDrop?.(stash.index)}
                           title={t("workspace.stashDrop")}
-                        ><X size={10} /></button>
+                        >
+                          <X size={10} />
+                        </button>
                       </div>
                     )}
                   </For>
@@ -668,11 +761,7 @@ const WorkspaceView: Component<WorkspaceViewProps> = (props) => {
           <div class={styles.diffPanel}>
             <Show
               when={selectedFile()}
-              fallback={
-                <div class={styles.diffPlaceholder}>
-                  {t("workspace.diffPlaceholder")}
-                </div>
-              }
+              fallback={<div class={styles.diffPlaceholder}>{t("workspace.diffPlaceholder")}</div>}
             >
               <div class={styles.diffHeader}>
                 <span class={styles.diffFilePath}>{selectedFile()}</span>
@@ -693,25 +782,27 @@ const WorkspaceView: Component<WorkspaceViewProps> = (props) => {
                           <For each={file.hunks}>
                             {(hunk) => (
                               <div>
-                                <div class={styles.diffHunkHeader}>
-                                  {hunk.header}
-                                </div>
+                                <div class={styles.diffHunkHeader}>{hunk.header}</div>
                                 <For each={hunk.lines}>
                                   {(line) => (
-                                    <div class={`${styles.diffLine} ${
-                                      line.origin === "Addition" ? styles.diffLineAddition :
-                                      line.origin === "Deletion" ? styles.diffLineDeletion :
-                                      styles.diffLineContext
-                                    }`}>
-                                      <span class={styles.diffLineNo}>
-                                        {line.new_lineno ?? ""}
-                                      </span>
+                                    <div
+                                      class={`${styles.diffLine} ${
+                                        line.origin === "Addition"
+                                          ? styles.diffLineAddition
+                                          : line.origin === "Deletion"
+                                            ? styles.diffLineDeletion
+                                            : styles.diffLineContext
+                                      }`}
+                                    >
+                                      <span class={styles.diffLineNo}>{line.new_lineno ?? ""}</span>
                                       <span class={styles.diffLinePrefix}>
-                                        {line.origin === "Addition" ? "+" : line.origin === "Deletion" ? "-" : " "}
+                                        {line.origin === "Addition"
+                                          ? "+"
+                                          : line.origin === "Deletion"
+                                            ? "-"
+                                            : " "}
                                       </span>
-                                      <span class={styles.diffLineContent}>
-                                        {line.content}
-                                      </span>
+                                      <span class={styles.diffLineContent}>{line.content}</span>
                                     </div>
                                   )}
                                 </For>
@@ -735,7 +826,9 @@ const WorkspaceView: Component<WorkspaceViewProps> = (props) => {
           <div class={styles.discardDialog}>
             <h3 class={styles.discardTitle}>{t("workspace.confirmDiscard")}</h3>
             <p class={styles.discardMessage}>
-              {discardTarget() ? `${t("workspace.confirmDiscardFile").replace("{files}", discardTarget()!.join(", "))}` : t("workspace.confirmDiscardAll")}
+              {discardTarget()
+                ? `${t("workspace.confirmDiscardFile").replace("{files}", discardTarget()!.join(", "))}`
+                : t("workspace.confirmDiscardAll")}
               {t("workspace.irreversible")}
             </p>
             <div class={styles.discardActions}>

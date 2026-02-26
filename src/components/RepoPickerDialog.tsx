@@ -6,6 +6,7 @@ import type { RepoEntry, GitHubRepoInfo } from "@/types";
 import { getRecentRepos } from "@/services/git";
 import * as githubService from "@/services/github";
 import { useGitHub } from "@/stores/github";
+import { logger } from "@/utils/logger";
 import styles from "./RepoPickerDialog.module.css";
 
 export interface RepoPickerDialogProps {
@@ -69,7 +70,7 @@ const RepoPickerDialog: Component<RepoPickerDialogProps> = (props) => {
       const repos = await getRecentRepos();
       setRecentRepos(repos);
     } catch (err) {
-      console.error("[RepoPickerDialog] 获取最近仓库失败:", err);
+      logger.error("RepoPickerDialog", "获取最近仓库失败:", err);
     }
   };
 
@@ -81,7 +82,7 @@ const RepoPickerDialog: Component<RepoPickerDialogProps> = (props) => {
         setGhRepos(repos);
       }
     } catch (err) {
-      console.error("[RepoPickerDialog] 搜索 GitHub 仓库失败:", err);
+      logger.error("RepoPickerDialog", "搜索 GitHub 仓库失败:", err);
     } finally {
       if (searchQuery().trim() === query) {
         setGhLoading(false);
@@ -99,7 +100,7 @@ const RepoPickerDialog: Component<RepoPickerDialogProps> = (props) => {
     const q = searchQuery().toLowerCase();
     if (!q) return recentRepos();
     return recentRepos().filter(
-      (r) => r.name.toLowerCase().includes(q) || r.path.toLowerCase().includes(q)
+      (r) => r.name.toLowerCase().includes(q) || r.path.toLowerCase().includes(q),
     );
   };
 
@@ -112,9 +113,7 @@ const RepoPickerDialog: Component<RepoPickerDialogProps> = (props) => {
   const hasQuery = () => searchQuery().trim().length > 0;
 
   const searchPlaceholder = () =>
-    isRemoteOnly()
-      ? t("welcome.searchRepos")
-      : t("welcome.searchRepos");
+    isRemoteOnly() ? t("welcome.searchRepos") : t("welcome.searchRepos");
 
   return (
     <Show when={props.open}>

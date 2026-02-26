@@ -10,14 +10,14 @@ use crate::state::AppState;
 pub async fn get_branches(state: State<'_, AppState>) -> Result<Vec<BranchInfo>, AppError> {
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.branches()
+    repo.branches().await
 }
 
 #[tauri::command]
 pub async fn get_current_branch(state: State<'_, AppState>) -> Result<String, AppError> {
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.current_branch()
+    repo.current_branch().await
 }
 
 #[tauri::command]
@@ -45,7 +45,7 @@ pub async fn delete_branch(name: String, state: State<'_, AppState>) -> Result<(
 pub async fn get_branch_tips(state: State<'_, AppState>) -> Result<HashMap<String, Vec<String>>, AppError> {
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.branch_tips()
+    repo.branch_tips().await
 }
 
 // ==================== Phase 2: Rename ====================

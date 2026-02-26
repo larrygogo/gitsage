@@ -8,7 +8,7 @@ use crate::state::AppState;
 pub async fn get_tags(state: State<'_, AppState>) -> Result<Vec<TagInfo>, AppError> {
     let repo = state.current_repo.lock().await;
     let repo = repo.as_ref().ok_or(AppError::General("No repository opened".into()))?;
-    repo.tags()
+    repo.tags().await
 }
 
 #[tauri::command]
