@@ -137,7 +137,8 @@
   transition: background-color 0.1s ease;
 }
 
-.branchItem:hover {
+.branchItem:hover,
+.branchItem.active {
   background-color: var(--gs-accent-subtle);
 }
 
@@ -178,7 +179,7 @@
   display: inline-flex;
   padding: 1px 6px;
   background-color: var(--gs-accent-primary);
-  color: #ffffff;
+  color: #000000;
   border-radius: 4px;
   font-size: 10px;
   font-weight: 600;
@@ -225,7 +226,10 @@
   font-size: 11px;
   cursor: pointer;
   white-space: nowrap;
-  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .branchActionBtn:hover {
@@ -339,7 +343,9 @@
   border-radius: 4px;
   color: var(--gs-text-muted);
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .viewModeBtn:hover {
@@ -390,7 +396,7 @@
 }
 
 .contextMenuItemDanger {
-  color: #EF4444;
+  color: #ef4444;
 }
 
 .contextMenuDivider {

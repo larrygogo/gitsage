@@ -101,7 +101,7 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
   const [showLocalBranches, setShowLocalBranches] = createSignal(true);
   const [showRemoteBranches, setShowRemoteBranches] = createSignal(true);
   const [expandedBranchDirs, setExpandedBranchDirs] = createSignal<Set<string>>(new Set());
-  const [branchViewMode, setBranchViewMode] = createSignal<"tree" | "list">("tree");
+  const [branchViewMode, setBranchViewMode] = createSignal<"tree" | "list">("list");
   const [contextMenu, setContextMenu] = createSignal<{
     x: number;
     y: number;
@@ -255,7 +255,7 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
 
   const renderLocalBranchItem = (branch: BranchInfo, depth: number) => (
     <div
-      class={`${styles.branchItem} ${branch.is_head ? styles.current : ""}`}
+      class={`${styles.branchItem} ${branch.is_head ? styles.current : ""} ${contextMenu()?.branch.name === branch.name ? styles.active : ""}`}
       style={{ "padding-left": `${16 + depth * 16}px` }}
       onContextMenu={(e) => handleContextMenu(e, branch, false)}
     >
@@ -292,51 +292,12 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
         <span class={styles.currentBadge}>{t("branches.current")}</span>
       </Show>
       {renderTrackingInfo(branch)}
-      <Show when={!branch.is_head}>
-        <div class={styles.branchActions}>
-          <button
-            class={styles.branchActionBtn}
-            onClick={() => handleCheckout(branch.name)}
-            title={t("branches.switchTo")}
-          >
-            <CornerDownLeft size={12} /> {t("branches.checkout")}
-          </button>
-          <button
-            class={styles.branchActionBtn}
-            onClick={() => handleMerge(branch.name)}
-            title={t("branches.mergeToCurrent")}
-          >
-            <GitMerge size={12} /> {t("branches.merge")}
-          </button>
-          <button
-            class={styles.branchActionBtn}
-            onClick={() => handleRebase(branch.name)}
-            title={t("branches.rebaseTo")}
-          >
-            <ArrowRightLeft size={12} /> {t("branches.rebase")}
-          </button>
-          <button
-            class={styles.branchActionBtn}
-            onClick={() => handleStartRename(branch.name)}
-            title={t("branches.rename")}
-          >
-            <Pencil size={12} />
-          </button>
-          <button
-            class={`${styles.branchActionBtn} ${styles.danger}`}
-            onClick={() => handleDelete(branch.name)}
-            title={t("branches.deleteBranch")}
-          >
-            <Trash2 size={12} />
-          </button>
-        </div>
-      </Show>
     </div>
   );
 
   const renderRemoteBranchItem = (branch: BranchInfo, depth: number) => (
     <div
-      class={styles.branchItem}
+      class={`${styles.branchItem} ${contextMenu()?.branch.name === branch.name ? styles.active : ""}`}
       style={{ "padding-left": `${16 + depth * 16}px` }}
       onContextMenu={(e) => handleContextMenu(e, branch, true)}
     >
@@ -345,15 +306,6 @@ const BranchesView: Component<BranchesViewProps> = (props) => {
       </span>
       <span class={styles.branchName}>{branch.name}</span>
       {renderTrackingInfo(branch)}
-      <div class={styles.branchActions}>
-        <button
-          class={styles.branchActionBtn}
-          onClick={() => handleCheckout(branch.name)}
-          title={t("branches.checkoutRemoteTitle")}
-        >
-          <CornerDownLeft size={12} /> {t("branches.checkoutRemote")}
-        </button>
-      </div>
     </div>
   );
 

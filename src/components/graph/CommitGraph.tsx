@@ -47,7 +47,7 @@ function isDarkTheme(): boolean {
 /** Resolve a seed color to an HSL string with theme-appropriate lightness. */
 function seedColor(index: number): string {
   const [h, s] = SEED_HS[index];
-  const l = isDarkTheme() ? 60 : 42;
+  const l = isDarkTheme() ? 60 : 65;
   return `hsl(${h}, ${s}%, ${l}%)`;
 }
 
@@ -59,7 +59,7 @@ function getSeedColors(): string[] {
 function generateColor(index: number): string {
   const goldenAngle = 137.508;
   const hue = (index * goldenAngle) % 360;
-  const l = isDarkTheme() ? 60 : 42;
+  const l = isDarkTheme() ? 60 : 65;
   return `hsl(${Math.round(hue)}, 65%, ${l}%)`;
 }
 
@@ -533,8 +533,8 @@ const CommitGraph: Component<CommitGraphProps> = (props) => {
                                         height: "22px",
                                         padding: hasLocalCounterpart ? "0 5px" : "0 8px",
                                         "border-radius": "11px",
-                                        "background-color": color + "18",
-                                        color: color,
+                                        "background-color": color,
+                                        color: "#000000",
                                         "font-family":
                                           '"JetBrains Mono", "Fira Code", "Cascadia Code", monospace',
                                         "font-size": "10px",
